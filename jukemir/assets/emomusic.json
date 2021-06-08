@@ -1,0 +1,17 @@
+{
+  "EMOMUSIC_CLIPS": {
+    "path_rel": "datasets/emomusic/clips_45sec.tar.gz",
+    "url": "http://cvml.unige.ch/databases/emoMusic/clips_45sec.tar.gz",
+    "checksum": "3994a5d5fefc27f9540d1a69cd7f1294c68e6cb311ce49765021e2e9c7a1057b"
+  },
+  "EMOMUSIC_ANNOTATIONS": {
+    "path_rel": "datasets/emomusic/annotations.tar.gz",
+    "url": "http://cvml.unige.ch/databases/emoMusic/annotations.tar.gz",
+    "checksum": "e0cb0b06e1b0ce7f04b1572fc410937699b7fad9dae67ddaa745f06cda4b0b33"
+  },
+  "EMOMUSIC_MANUAL": {
+    "path_rel": "datasets/emomusic/dataset_manual.pdf",
+    "url": "http://cvml.unige.ch/databases/emoMusic/dataset_manual.pdf",
+    "checksum": "2bfc7f7cc58ac22283f54593ed5104a8210972fa182c1aca1da478e0dae77d44"
+  }
+}

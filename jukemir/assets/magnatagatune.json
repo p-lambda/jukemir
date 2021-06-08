@@ -1,0 +1,42 @@
+{
+  "MAGNATAGATUNE_MP3_001": {
+    "path_rel": "datasets/magnatagatune/mp3.zip.001",
+    "url": "http://mi.soi.city.ac.uk/datasets/magnatagatune/mp3.zip.001",
+    "checksum": "f857fe185968773058cc71662c2ef5d8f2d4b7338e3c122cfd52f82dcb9760b9"
+  },
+  "MAGNATAGATUNE_MP3_002": {
+    "path_rel": "datasets/magnatagatune/mp3.zip.002",
+    "url": "http://mi.soi.city.ac.uk/datasets/magnatagatune/mp3.zip.002",
+    "checksum": "fc2e1ec441755556ed1398b1808f1b08b6034372f8bc27394510c0c58cdb52ce"
+  },
+  "MAGNATAGATUNE_MP3_003": {
+    "path_rel": "datasets/magnatagatune/mp3.zip.003",
+    "url": "http://mi.soi.city.ac.uk/datasets/magnatagatune/mp3.zip.003",
+    "checksum": "83a689824c17e82f6eb81cdbc4e4ca239a4cfc1fb41f1a5c80b861caec90450f"
+  },
+  "MAGNATAGATUNE_CLIP_METADATA": {
+    "path_rel": "datasets/magnatagatune/clip_info_final.csv",
+    "url": "http://mi.soi.city.ac.uk/datasets/magnatagatune/clip_info_final.csv",
+    "checksum": "cb6108a10d3a91f0bfd7d2fbec2382559d15f20c8d28093f14e12162a47a3e78"
+  },
+  "MAGNATAGATUNE_ANNOTATIONS": {
+    "path_rel": "datasets/magnatagatune/annotations_final.csv",
+    "url": "http://mi.soi.city.ac.uk/datasets/magnatagatune/annotations_final.csv",
+    "checksum": "99b94e95825d4fa576386a5367b9c96e0ec636e9f9c240aceb492f4728f68c3c"
+  },
+  "MAGNATAGATUNE_CLIP_METADATA_MYSQL": {
+    "path_rel": "datasets/magnatagatune/clip_info_final.sql.zip",
+    "url": "http://mi.soi.city.ac.uk/datasets/magnatagatune/clip_info_final.sql.zip",
+    "checksum": "06ee2496fbc517929979f1e83a1ee7aa4b38ff2f277111c48dbe12eb3b9d7956"
+  },
+  "MAGNATAGATUNE_AUDIO_FEATURES": {
+    "path_rel": "datasets/magnatagatune/mp3_echonest_xml.zip",
+    "url": "http://mi.soi.city.ac.uk/datasets/magnatagatune/mp3_echonest_xml.zip",
+    "checksum": "80e973e0c433e733ed3dcab9ff2e73d1ae3842b84a3ef348d53a9e88aaaa64d4"
+  },
+  "MAGNATAGATUNE_SIMILARITY": {
+    "path_rel": "datasets/magnatagatune/comparisons_final.csv",
+    "url": "http://mi.soi.city.ac.uk/datasets/magnatagatune/comparisons_final.csv",
+    "checksum": "cf210e087ed5b3f3f8b164626e1d2857cf0ba9ae66bd9229bafe042889107a98"
+  }
+}

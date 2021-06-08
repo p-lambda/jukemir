@@ -1,0 +1,22 @@
+{
+  "GTZAN": {
+    "path_rel": "datasets/gtzan/genres.tar.gz",
+    "url": "http://opihi.cs.uvic.ca/sound/genres.tar.gz",
+    "checksum": "24347e0223d2ba798e0a558c4c172d9d4a19c00bb7963fe055d183dadb4ef2c6"
+  },
+  "GTZAN_TRAIN": {
+    "path_rel": "datasets/gtzan/train_filtered.txt",
+    "url": "https://raw.githubusercontent.com/coreyker/dnn-mgr/bdad579ea6cb37b665ea6019fe1026a6ce20cbc7/gtzan/train_filtered.txt",
+    "checksum": "2b04966cef1486f1a7767b74271533fa23e220388db804a1937835e1fc4fa3fa"
+  },
+  "GTZAN_VALID": {
+    "path_rel": "datasets/gtzan/valid_filtered.txt",
+    "url": "https://raw.githubusercontent.com/coreyker/dnn-mgr/bdad579ea6cb37b665ea6019fe1026a6ce20cbc7/gtzan/valid_filtered.txt",
+    "checksum": "f8fbee7c52397a0e0f3a91dc54fedecb2e27f5bdc9a9daeab8cb10d077e26956"
+  },
+  "GTZAN_TEST": {
+    "path_rel": "datasets/gtzan/test_filtered.txt",
+    "url": "https://raw.githubusercontent.com/coreyker/dnn-mgr/bdad579ea6cb37b665ea6019fe1026a6ce20cbc7/gtzan/test_filtered.txt",
+    "checksum": "09cafa6a89ce0a27f30ed250d56ecb4d03c22fffb5a693f96c7ae655ee02ac72"
+  }
+}
