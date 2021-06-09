@@ -24,5 +24,5 @@ RUN python -m pip install --no-cache-dir tqdm==4.61.0
 
 # Setup entrypoint
 WORKDIR /code
-COPY traditional/main.py main.py
+COPY handcrafted/main.py main.py
 ENTRYPOINT ["python", "main.py", "chroma"]
