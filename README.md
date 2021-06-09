@@ -11,7 +11,7 @@ Once Docker is running, you can download all of the datasets by running the foll
 ```sh
 for ASSET_TAG in magnatagatune gtzan emomusic giantsteps
 do
-	./cmd.sh python -m jukemir.assets $ASSET_TAG --delete_wrong --num_parallel 8
+	docker exec -it jukemir python -m jukemir.assets $ASSET_TAG --delete_wrong --num_parallel 8
 done
 ```
 
@@ -26,7 +26,7 @@ The previous step downloads all of the datasets in their encoded (e.g., MP3) for
 ```sh
 for DATASET_TAG in magnatagatune gtzan_ff emomusic giantsteps_clips
 do
-	./cmd.sh python -m jukemir.datasets.cache $DATASET_TAG audio
+	docker exec -it jukemir python -m jukemir.datasets.cache $DATASET_TAG audio
 done
 ```
 
@@ -40,9 +40,13 @@ The resultant files will be downloaded to the `processed` subdirectory of your c
 JUKEMIR_CACHE_DIR=~/.jukemir
 for REPRESENTATION_TAG in chroma mfcc choi musicnn clmr jukebox
 do
+	pushd representations/$REPRESENTATION_TAG
 	for DATASET_TAG in magnatagatune gtzan_ff emomusic giantsteps_clips
 	do
-		./cmd.sh python -m jukemir.datasets.cache $DATASET_TAG audio
+		DATASET_DIR=$JUKEMIR_CACHE_DIR/datasets/debug
+		
+		docker exec -it jukemir python -m jukemir.datasets.cache $DATASET_TAG audio
 	done
+	popd
 done
 ```
