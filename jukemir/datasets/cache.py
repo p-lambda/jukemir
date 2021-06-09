@@ -6,6 +6,7 @@ if __name__ == "__main__":
     from .. import CACHE_DIR
     from . import (
         cache_dataset,
+        iter_debug,
         iter_emomusic,
         iter_giantsteps_clips,
         iter_gtzan_ff,

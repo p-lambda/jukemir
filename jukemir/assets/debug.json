@@ -1,0 +1,7 @@
+{
+  "DEBUG_MP3": {
+    "path_rel": "datasets/debug/test1_22050.mp3",
+    "url": "https://github.com/librosa/librosa/raw/main/tests/data/test1_22050.mp3",
+    "checksum": "a2084c37c252a1de25586549ef0ab5c512f8e91a2c072d5a8941817d949996b2"
+  }
+}

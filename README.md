@@ -33,3 +33,16 @@ done
 This script will also take several hours to run and will produce about 50GB of WAV files.
 
 The resultant files will be downloaded to the `processed` subdirectory of your cache directory (`~/jukemir/cache` by default).
+
+### Extracting representations
+
+```sh
+JUKEMIR_CACHE_DIR=~/.jukemir
+for REPRESENTATION_TAG in chroma mfcc choi musicnn clmr jukebox
+do
+	for DATASET_TAG in magnatagatune gtzan_ff emomusic giantsteps_clips
+	do
+		./cmd.sh python -m jukemir.datasets.cache $DATASET_TAG audio
+	done
+done
+```

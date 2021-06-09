@@ -447,6 +447,10 @@ def iter_giantsteps_clips(metadata_only=False):
     return _iter_giantsteps(metadata_only=metadata_only, clip_duration=30.0)
 
 
+def iter_debug(metadata_only=False):
+    yield ("debug", {"y": "guitar"}, retrieve_and_or_verify_asset("DEBUG_MP3"))
+
+
 def write_dataset_json(dataset, path):
     path = pathlib.Path(path)
     if path.suffix == ".gz":
