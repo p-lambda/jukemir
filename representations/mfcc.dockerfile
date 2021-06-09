@@ -1,14 +1,10 @@
 # Import Ubuntu/CUDA/cuDNN
 FROM ubuntu:20.04
 
-# Create IO dirs
-RUN mkdir /input
-RUN mkdir /output
-
 # Configure shell
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update --fix-missing
 SHELL ["/bin/bash", "-c"]
+RUN apt-get update --fix-missing
 
 # Install Python
 ENV LANG C.UTF-8
@@ -23,6 +19,9 @@ RUN python -m pip install --no-cache-dir scipy==1.6.3
 RUN python -m pip install --no-cache-dir tqdm==4.61.0
 
 # Setup entrypoint
+RUN mkdir /input
+RUN mkdir /output
+RUN mkdir /code
 WORKDIR /code
 COPY handcrafted/main.py main.py
 ENTRYPOINT ["python", "main.py", "mfcc"]
