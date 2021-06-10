@@ -8,6 +8,7 @@ import tempfile
 from collections import Counter, defaultdict
 
 import numpy as np
+from scipy.io.wavfile import read as wavread
 from tqdm import tqdm
 
 from ..assets import retrieve_and_or_verify_asset
@@ -165,8 +166,6 @@ def iter_magnatagatune(metadata_only=False, filter_empty=False):
                         "audio_duration": audio_duration,
                         "clip_idx": audio_uids.index(uid),
                         "clip_offset": float(metadata["segmentStart"]),
-                        "clip_duration": float(metadata["segmentEnd"])
-                        - float(metadata["segmentStart"]),
                     },
                     "y": None
                     if tags is None
@@ -238,7 +237,6 @@ def iter_emomusic(metadata_only=False):
                                 "audio_duration": clip_end,
                                 "clip_idx": 0,
                                 "clip_offset": clip_start,
-                                "clip_duration": 45.0,
                             },
                             "y": None,
                             "extra": {},
@@ -412,7 +410,6 @@ def _iter_giantsteps(metadata_only=False, clip_duration=None):
                         "audio_duration": duration,
                         "clip_idx": None,
                         "clip_offset": None,
-                        "clip_duration": clip_duration,
                     }
                     for clip_idx, clip_offset in enumerate(
                         np.arange(0, duration, clip_duration)
@@ -428,9 +425,14 @@ def _iter_giantsteps(metadata_only=False, clip_duration=None):
                         clip_metadata = copy.deepcopy(metadata)
                         clip_metadata["clip"]["clip_idx"] = clip_idx
                         clip_metadata["clip"]["clip_offset"] = clip_offset
-                        clip_metadata["clip"]["clip_duration"] = this_clip_duration
-                        result = (clip_uid, clip_metadata, mp3_path)
-                        yield result[: 2 if metadata_only else 3]
+                        result = (
+                            clip_uid,
+                            clip_metadata,
+                            mp3_path,
+                            clip_offset,
+                            clip_duration,
+                        )
+                        yield result[: 2 if metadata_only else 5]
                 else:
                     result = (uid, metadata)
                     if not metadata_only:
@@ -482,26 +484,39 @@ def cache_dataset(dataset_iter, out_dir, progress_bar=True):
     for example in _tqdm(dataset_iter):
         if len(example) == 2:
             uid, metadata = example
-        elif len(example) == 3:
-            uid, metadata, src_audio_path = example
+        elif len(example) >= 3:
+            if len(example) == 3:
+                uid, metadata, src_audio_path = example
+                clip_offset = None
+            elif len(example) == 5:
+                uid, metadata, src_audio_path, clip_offset, clip_duration = example
+            else:
+                raise ValueError("Bad iterator")
             if src_audio_path is not None:
                 dest_audio_path = pathlib.Path(audio_dir, f"{uid}.wav")
                 dest_audio_path.parent.mkdir(exist_ok=True)
-                clip_args = ""
-                if "clip" in metadata:
-                    clip_offset = metadata["clip"]["clip_offset"]
-                    clip_duration = metadata["clip"]["clip_duration"]
-                    clip_args = f"-ss {clip_offset} -t {clip_duration}"
+                clip_args = (
+                    ""
+                    if clip_offset is None
+                    else f"-ss {clip_offset} -t {clip_duration}"
+                )
                 status, stdout, stderr = run_cmd_sync(
                     f"ffmpeg -y -i {src_audio_path} {clip_args} -ac 1 -bitexact {dest_audio_path}",
                     timeout=60,
                 )
-                if status != 0:
-                    if dest_audio_path.is_file():
-                        dest_audio_path.unlink()
+                try:
+                    sr, audio = wavread(dest_audio_path)
+                    assert audio.ndim == 1
+                    assert audio.shape[0] > 0
+                    if "clip" in metadata:
+                        metadata["clip"]["clip_duration"] = audio.shape[0] / sr
+                except:
                     raise Exception(f"Could not convert source audio to wav:\n{stderr}")
         else:
             raise ValueError("Bad iterator")
+
+        if uid in all_metadata:
+            raise ValueError("Duplicate UID in interator")
         all_metadata[uid] = metadata
 
     write_dataset_json(all_metadata, metadata_path)
