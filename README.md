@@ -1,4 +1,16 @@
+# Jukebox for MIR transfer learning
+
+This repository contains code for our paper [_Codified audio language modeling learns useful representations for music information retrieval_]() (Castellon et al. 2021), which demonstrates that [OpenAI's Jukebox](https://openai.com/blog/jukebox/) provides rich representations for MIR transfer learning.
+
+This README is divided into two standalone sections. The [first section](#simple-example) is optimized for simplicity and provides an end-to-end example of genre detection using representations from Jukebox. The [second section](#reproducing-results) is optimized for reproducibility and provides step-by-step instructions for reproducing the results from our paper.
+
+## Simple example of using Jukebox for transfer learning
+
 ## Reproducing results from our paper
+
+This section provides step-by-step instructions for reproducing all results from our paper. All code is executed within pre-built Docker containers to increase reproducibility.
+
+If you only need precomputed representations for all datasets, you can skip most of these steps and simply [download them from here](TODO).
 
 ### Setting up Docker and cache
 
@@ -7,9 +19,9 @@
 Once Docker is running, you can download all of the datasets by running the following shell script:
 
 ```sh
-for ASSET_TAG in magnatagatune gtzan emomusic giantsteps
+for ASSET_PREFIX in magnatagatune gtzan emomusic giantsteps
 do
-	docker exec -it jukemir python -m jukemir.assets $ASSET_TAG --delete_wrong --num_parallel 8
+	docker exec -it jukemir python -m jukemir.assets $ASSET_PREFIX --delete_wrong --num_parallel 8
 done
 ```
 
@@ -72,4 +84,17 @@ do
 		done
 	done
 done
+```
+
+## Citation
+
+If you use this codebase in your work, please consider citing our paper:
+
+```
+@article{castellon2021calm,
+  title={Codified audio language modeling learns useful representations for music information retrieval},
+  author={Rodrigo Castellon and Chris Donahue and Percy Liang},
+  journal={arXiv:2107.},
+  year={2021},
+}
 ```
