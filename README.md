@@ -56,34 +56,44 @@ docker run -it --rm -v $(pwd)/mywavs:/input -v $(pwd)/mywavs_jukebox:/output juk
 
 Note that each container also takes two optional arguments as input, `--batch_size` and `--batch_idx`, which can be used to compute representations for a subset (batch) of the input WAV file directory. This is useful for parallelizing computation across several workers. Note that, because `choi` uses batchnorm during inference, its representations will differ if `--batch_size` is changed from its default value of `256` (not recommended). All other representations are invariant to batch size.
 
-The following script will re-extract all representations for all datasets from our paper. However, it is provided mainly for reference, as running all of the extraction on a single machine will take several days. Hence, this script should be thought of as a starting point for parallelizing the work across many machines in your own environment:
+The following Python script will generate all of the Docker commands needed to re-extract all representations for all datasets (see [`scripts/extract.sh`](scripts/extract.sh) for output). We highly recommend executing these commands in parallel in your own computing environment, as running them one at a time will take a long time.
 
-```sh
-CACHE_DIR=$(python3 -c "from jukemir import CACHE_DIR; print(CACHE_DIR)")
-#DATASET_SIZES = ( 25860 930 744 7035 )
-DATASET_TAGS=( magnatagatune gtzan_ff emomusic giantsteps_clips )
-DATASET_NUM_BATCHES=( 102 4 3 28 )
-for i in "${!DATASET_TAGS[@]}"
-do
-	DATASET_TAG=${DATASET_TAGS[$i]}
-	DATASET_NUM_BATCH=${DATASET_NUM_BATCHES[$i]}
-	for REPRESENTATION_TAG in chroma mfcc choi musicnn clmr jukebox
-	do
-		for ((batch_idx=0;batch_idx<DATASET_NUM_BATCH;batch_idx++))
-		do
-			echo "Extracting" $DATASET_TAG $REPRESENTATION_TAG $batch_idx
-			DATASET_DIR=$CACHE_DIR/datasets/debug
-			docker run \
-				-it \
-				--rm \
-				-v $CACHE_DIR/processed/$DATASET_TAG/wav:/input \
-				-v $CACHE_DIR/representations/$DATASET_TAG/$REPRESENTATION_TAG:/output \
-				jukemir/representations_${REPRESENTATION_TAG} \
-				--batch_size 256 \
-				--batch_idx $batch_idx
-		done
-	done
-done
+```py
+import math
+
+from jukemir import CACHE_DIR
+
+REPRESENTATIONS = ["chroma", "mfcc", "choi", "musicnn", "clmr", "jukebox"]
+DATASET_SIZES = [
+    ("emomusic", 744),
+    ("gtzan_ff", 930),
+    ("magnatagatune", 25860),
+    ("giantsteps_clips", 7035),
+]
+BATCH_SIZE = 256
+CMD_TEMPLATE = """
+docker run \\
+	-it \\
+	--rm \\
+	-v {cache_dir}/processed/{dataset_tag}/wav:/input \\
+	-v {cache_dir}/representations/{dataset_tag}/{representation_tag}:/output \\
+	jukemir/representations_{representation_tag} \\
+	--batch_size {batch_size} \\
+	--batch_idx {batch_idx}
+""".strip()
+
+for dataset_tag, dataset_size in DATASET_SIZES:
+    for representation_tag in REPRESENTATIONS:
+        for batch_idx in range(math.ceil(dataset_size / BATCH_SIZE)):
+            print(
+                CMD_TEMPLATE.format(
+                    cache_dir=CACHE_DIR,
+                    dataset_tag=dataset_tag,
+                    representation_tag=representation_tag,
+                    batch_size=BATCH_SIZE,
+                    batch_idx=batch_idx,
+                )
+            )
 ```
 
 ## Citation
