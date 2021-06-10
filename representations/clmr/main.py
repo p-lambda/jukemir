@@ -46,19 +46,16 @@ if __name__ == "__main__":
             pass
 
         if encoder is None:
-            config = yaml_config_hook("clmr/config/config.yaml")
+            # References:
+            # - https://colab.research.google.com/drive/1Njz8EoN4br587xjpRKcssMuqQY6Cc5nj#scrollTo=igc0TggNyj8U
+            # - https://github.com/Spijkervet/CLMR/blob/master/linear_evaluation.py
+            # - https://github.com/Spijkervet/CLMR/blob/0e52a20c7687ecec00c4d223230f00bffe7430a7/clmr/evaluation.py#L8
+
             encoder = SampleCNN(
                 strides=[3, 3, 3, 3, 3, 3, 3, 3, 3],
-                supervised=config["supervised"],
+                supervised=0,
                 out_dim=50,
             )
-
-            # get dimensions of last fully-connected layer
-            n_features = encoder.fc.in_features
-
-            # load the enoder weights from a CLMR checkpoint
-            # set the last fc layer to the Identity function, since we attach the
-            # fine-tune head seperately
 
             state_dict = load_encoder_checkpoint(ENCODER_CHECKPOINT_PATH)
             encoder.load_state_dict(state_dict)
@@ -72,7 +69,7 @@ if __name__ == "__main__":
             audio, sr = librosa.core.load(input_path, sr=SAMPLE_RATE)
             if audio.ndim == 1:
                 audio = audio[np.newaxis]
-            audio = torch.tensor(audio, dtype=torch.float32)
+            audio = torch.tensor(audio, dtype=torch.float32, device=device)
             audio = torch.mean(audio, axis=0, keepdim=True)
             frames = torch.split(audio, FRAME_LENGTH, dim=1)
             if len(frames) <= 1:
