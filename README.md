@@ -36,7 +36,7 @@ The resultant files will be downloaded to the `processed` subdirectory of your c
 
 Next, we need to extract representations for each WAV file in the processed datasets. Note that this process is resource-intensive (especially for certain representations). Unless you need to extract representations for a new dataset, you can skip this step and [download pre-computed representations for all datasets](TODO).
 
-Each representation from our paper (`chroma`, `mfcc`, `choi`, `musicnn`, `clmr`, `jukebox`) has been packaged into a pre-built Docker container with a common API. The basic "type signature" of each container takes a folder of WAV files as input and returns a folder of Numpy arrays containing the corresponding representations. For example, if you have a folder in your current working directory called `mywavs/`, you can extract representations from Jukebox via the following command, which will create a folder of Numpy arrays called `mywavs_jukebox`:
+Each representation from our paper (`chroma`, `mfcc`, `choi`, `musicnn`, `clmr`, `jukebox`) has been packaged into a pre-built Docker container with a common API. The basic "type signature" of each container takes a folder of WAV files as input and returns a folder of Numpy arrays containing the corresponding representations. For example, if you have a folder in your current working directory called `mywavs/`, you can extract representations from Jukebox via the following command, which will create a folder of Numpy arrays called `mywavs_jukebox/`:
 
 ```sh
 docker run -it --rm -v $(pwd)/mywavs:/input -v $(pwd)/mywavs_jukebox:/output jukemir/representations_jukebox
@@ -55,7 +55,7 @@ for i in "${!DATASET_TAGS[@]}"
 do
 	DATASET_TAG=${DATASET_TAGS[$i]}
 	DATASET_NUM_BATCH=${DATASET_NUM_BATCHES[$i]}
-	for REPRESENTATION_TAG in chroma mfcc choi musicnn # clmr jukebox
+	for REPRESENTATION_TAG in chroma mfcc choi musicnn clmr jukebox
 	do
 		for ((batch_idx=0;batch_idx<DATASET_NUM_BATCH;batch_idx++))
 		do
