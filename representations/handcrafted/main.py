@@ -14,6 +14,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_idx", type=int)
     parser.set_defaults(batch_size=None, batch_idx=None)
     args = parser.parse_args()
+    print(args)
 
     input_dir = pathlib.Path("/input")
     output_dir = pathlib.Path("/output")

@@ -171,7 +171,7 @@ if __name__ == "__main__":
         batch_starts = [batch_starts[args.batch_idx]]
     batches = [input_paths[s : s + args.batch_size] for s in batch_starts]
 
-    models = [load_model_for_mid(i) for i in range(5)]
+    models = None
     for input_batch in batches:
         # Check if batch done
         batch_done = True
@@ -197,6 +197,8 @@ if __name__ == "__main__":
         df.to_csv("data_csv/dummy.csv")
 
         # Predict
+        if models is None:
+            models = [load_model_for_mid(i) for i in range(5)]
         representations = []
         for i in range(5):
             predict("dummy", args.batch_size, models[i], ".", "_layer_{}".format(i))
