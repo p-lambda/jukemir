@@ -8,7 +8,7 @@ This README is divided into two standalone sections. The [first section](#simple
 
 ## Reproducing results from our paper
 
-This section provides step-by-step instructions for reproducing all results from our paper. All code is executed within pre-built Docker containers to increase reproducibility.
+This section provides step-by-step instructions for reproducing all results from our paper. All code is executed within [pre-built Docker containers](https://hub.docker.com/orgs/jukemir/repositories) to increase reproducibility.
 
 If you only need precomputed representations for all datasets, you can skip most of these steps and simply [download them from here](TODO).
 
@@ -60,9 +60,9 @@ The following script will re-extract all representations for all datasets from o
 
 ```sh
 CACHE_DIR=$(python3 -c "from jukemir import CACHE_DIR; print(CACHE_DIR)")
-#DATASET_SIZES = ( 25860 930 744 8796 )
+#DATASET_SIZES = ( 25860 930 744 7035 )
 DATASET_TAGS=( magnatagatune gtzan_ff emomusic giantsteps_clips )
-DATASET_NUM_BATCHES=( 102 4 3 35 )
+DATASET_NUM_BATCHES=( 102 4 3 28 )
 for i in "${!DATASET_TAGS[@]}"
 do
 	DATASET_TAG=${DATASET_TAGS[$i]}

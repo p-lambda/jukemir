@@ -1,4 +1,5 @@
-FRAME_RATE = 22050 / 512
+SAMPLE_RATE = 22050
+HOP_LENGTH = 512
 
 if __name__ == "__main__":
     import pathlib
@@ -37,7 +38,7 @@ if __name__ == "__main__":
             pass
 
         # Load audio
-        audio, sr = librosa.core.load(input_path, sr=None, mono=True)
+        audio, sr = librosa.core.load(input_path, sr=SAMPLE_RATE, mono=True)
 
         # Normalize
         norm_factor = np.abs(audio).max()
@@ -46,14 +47,10 @@ if __name__ == "__main__":
 
         # Extract features
         if args.feature == "chroma":
-            features = librosa.feature.chroma_cqt(
-                audio, sr=sr, hop_length=round(sr / FRAME_RATE)
-            )
+            features = librosa.feature.chroma_cqt(audio, sr=sr, hop_length=HOP_LENGTH)
             assert features.shape[0] == 12
         elif args.feature == "mfcc":
-            features = librosa.feature.mfcc(
-                audio, sr=sr, hop_length=round(sr / FRAME_RATE)
-            )
+            features = librosa.feature.mfcc(audio, sr=sr, hop_length=HOP_LENGTH)
             assert features.shape[0] == 20
         else:
             assert False
