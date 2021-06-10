@@ -54,7 +54,9 @@ Each representation from our paper (`chroma`, `mfcc`, `choi`, `musicnn`, `clmr`,
 docker run -it --rm -v $(pwd)/mywavs:/input -v $(pwd)/mywavs_jukebox:/output jukemir/representations_jukebox
 ```
 
-Note that each container also takes two optional arguments as input, `--batch_size` and `--batch_idx`, which can be used to compute representations for a subset (batch) of the input WAV file directory. This is useful for parallelizing computation across several workers. Note that, because `choi` uses batchnorm during inference, its representations will differ if `--batch_size` is changed from its default value of `256` (not recommended). All other representations are invariant to batch size.
+Note that each container also takes two optional arguments as input, `--batch_size` and `--batch_idx`, which can be used to compute representations for a subset (batch) of the input WAV file directory. This is useful for parallelizing computation across several workers.
+
+Because `choi` uses batchnorm during inference, its representations will differ if `--batch_size` is changed from its default value of `256` (not recommended). All other representations are invariant to batch size. Note that `musicnn`, `clmr`, and `jukebox` should be run on a machine with a GPU.
 
 The following Python script will generate all of the Docker commands needed to re-extract all representations for all datasets (see [`scripts/extract.sh`](scripts/extract.sh) for output). We highly recommend executing these commands in parallel in your own computing environment, as running them one at a time will take a long time.
 

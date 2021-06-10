@@ -186,7 +186,6 @@ if __name__ == "__main__":
                 np.load(output_path)
             except:
                 batch_done = False
-                break
         if batch_done:
             continue
 
