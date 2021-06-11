@@ -103,7 +103,8 @@ class Test(unittest.TestCase):
             valence, arousal = attrs["y"]
             valences.append(valence)
             arousals.append(arousal)
-        self.assertEqual(split_counts["train"], 619)
+        self.assertEqual(split_counts["train"], 504)
+        self.assertEqual(split_counts["valid"], 115)
         self.assertEqual(split_counts["test"], 125)
         self.assertAlmostEqual(np.min(valences), 1.6, places=3)
         self.assertAlmostEqual(np.max(valences), 8.1, places=3)

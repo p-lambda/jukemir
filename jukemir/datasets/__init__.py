@@ -250,6 +250,24 @@ def iter_emomusic(metadata_only=False):
                             float(row["mean_arousal"]),
                         ]
 
+        ratios = ["train"] * 8 + ["valid"] * 2
+        for uid, metadata in uid_to_metadata.items():
+            if metadata["split"] == "train":
+                artist = metadata["extra"]["songs_info"]["Artist"]
+                artist = "".join(
+                    [
+                        c
+                        for c in artist.lower()
+                        if (ord(c) < 128 and (c.isalpha() or c.isspace()))
+                    ]
+                )
+                artist = " ".join(artist.split())
+                artist_id = int(
+                    compute_checksum(artist.encode("utf-8"), algorithm="sha1"), 16
+                )
+                split = ratios[artist_id % len(ratios)]
+                metadata["split"] = split
+
         if not metadata_only:
             clips_path = retrieve_and_or_verify_asset("EMOMUSIC_CLIPS")
             shutil.unpack_archive(str(clips_path), d)
