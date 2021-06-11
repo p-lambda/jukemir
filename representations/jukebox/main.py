@@ -1,3 +1,4 @@
+import torch
 import librosa as lr
 import numpy as np
 
@@ -23,9 +24,12 @@ def get_z(audio, vqvae):
     # don't compute unnecessary discrete encodings
     audio = audio[: JUKEBOX_SAMPLE_RATE * 25]
 
-    zs = vqvae.encode(t.cuda.FloatTensor(audio[np.newaxis, :, np.newaxis]))
+    zs = vqvae.encode(torch.cuda.FloatTensor(audio[np.newaxis, :, np.newaxis]))
 
     z = zs[-1].flatten()[np.newaxis, :]
+
+    if z.shape[-1] < 8192:
+        raise ValueError('Audio file is not long enough')
 
     return z
 
@@ -88,7 +92,7 @@ def get_acts_from_file(fpath, hps, vqvae, top_prior, meanpool=True):
     acts = get_final_activations(z, x_cond, y_cond, top_prior)
 
     # postprocessing
-    acts = acts.squeeze().type(t.float16)
+    acts = acts.squeeze().type(torch.float16)
 
     if meanpool:
         acts = acts.mean(dim=0)
@@ -104,9 +108,6 @@ if __name__ == "__main__":
 
     # imports and set up Jukebox's multi-GPU parallelization
     import jukebox
-    import librosa
-    import numpy as np
-    import torch
     from jukebox.hparams import Hyperparams, setup_hparams
     from jukebox.make_models import MODELS, make_prior, make_vqvae
     from jukebox.utils.dist_utils import setup_dist_from_mpi
@@ -165,15 +166,14 @@ if __name__ == "__main__":
             )
 
             # Set up language model
-            # hparams = setup_hparams(priors[-1], dict())
-            # hparams["prior_depth"] = 36
-            # top_prior = make_prior(hparams, vqvae, device)
+            hparams = setup_hparams(priors[-1], dict())
+            hparams["prior_depth"] = 36
+            top_prior = make_prior(hparams, vqvae, device)
 
             loaded = True
 
         # Decode, resample, convert to mono, and normalize audio
         with torch.no_grad():
-            acts = get_acts_from_file(input_path, hps, vqvae, top_prior, meanpool=True)
-            acts = acts.cpu().numpy()
+            representation = get_acts_from_file(input_path, hps, vqvae, top_prior, meanpool=True)
 
-        np.save(output_path, acts)
+        np.save(output_path, representation)
