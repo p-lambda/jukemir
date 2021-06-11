@@ -15,8 +15,8 @@ RUN python -m pip install --no-cache-dir --upgrade pip setuptools
 # Install deps
 RUN apt-get install -y wget unzip
 RUN mkdir -p /root/.cache/jukebox/models/5b
-RUN wget https://openaipublic.azureedge.net/jukebox/models/5b/vqvae.pth.tar; mv vqvae.pth.tar /root/.cache/jukebox/models/
-RUN wget https://openaipublic.azureedge.net/jukebox/models/5b/prior_level_2.pth.tar; mv prior_level_2.pth.tar /root/.cache/jukebox/models/
+RUN wget https://openaipublic.azureedge.net/jukebox/models/5b/vqvae.pth.tar; mv vqvae.pth.tar /root/.cache/jukebox/models/5b
+RUN wget https://openaipublic.azureedge.net/jukebox/models/5b/prior_level_2.pth.tar; mv prior_level_2.pth.tar /root/.cache/jukebox/models/5b
 RUN apt-get install -y libsndfile1-dev
 RUN apt-get install -y libopenmpi-dev
 RUN apt-get install -y openssh-server
