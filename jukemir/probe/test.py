@@ -63,7 +63,7 @@ class Test(unittest.TestCase):
                 representations_root_dir=pathlib.Path(rdir),
             )
             exp.load_data()
-            exp.fit()
+            exp.train()
 
             # Evaluate
             results = exp.eval("test")

@@ -198,7 +198,7 @@ class ProbeExperiment:
             raise NotImplementedError()
         return loss
 
-    def fit(self):
+    def train(self):
         if self.wandb:
             import wandb as wandb_lib
 
