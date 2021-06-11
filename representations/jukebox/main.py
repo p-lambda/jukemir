@@ -1,3 +1,7 @@
+SAMPLE_RATE = 44100
+FRAME_HOP_LENGTH = 128
+NUM_FRAMES = 8192
+
 if __name__ == "__main__":
     import pathlib
     from argparse import ArgumentParser
@@ -6,8 +10,9 @@ if __name__ == "__main__":
     import jukebox
     import numpy as np
     import torch
+    import librosa
     from jukebox.hparams import Hyperparams, setup_hparams
-    from jukebox.make_models import MODELS, make_model, make_prior, make_vqvae
+    from jukebox.make_models import MODELS, make_prior, make_vqvae
     from jukebox.utils.dist_utils import setup_dist_from_mpi
     from tqdm import tqdm
 
@@ -34,7 +39,7 @@ if __name__ == "__main__":
         batch_start = batch_starts[args.batch_idx]
         input_paths = input_paths[batch_start : batch_start + args.batch_size]
 
-    model = None
+    loaded = False
     for input_path in tqdm(input_paths):
         # Check if output already exists
         output_path = pathlib.Path(output_dir, f"{input_path.stem}.npy")
@@ -44,10 +49,11 @@ if __name__ == "__main__":
         except:
             pass
 
-        if model is None:
+        if not loaded:
+            # Set up MPI
             rank, local_rank, device = setup_dist_from_mpi()
 
-            # set up vq-vae
+            # Set up VQVAE
             model = "5b"  # or "1b_lyrics"
             hps = Hyperparams()
             hps.sr = 44100
@@ -57,22 +63,33 @@ if __name__ == "__main__":
             max_batch_size = 3 if model == "5b_lyrics" else 16
             hps.levels = 3
             hps.hop_fraction = [0.5, 0.5, 0.125]
-
             vqvae, *priors = MODELS[model]
             vqvae = make_vqvae(
                 setup_hparams(vqvae, dict(sample_length=1048576)), device
             )
 
-            hparams = setup_hparams(priors[-1], dict())
-            hparams["prior_depth"] = 36
+            # Set up language model
+            #hparams = setup_hparams(priors[-1], dict())
+            #hparams["prior_depth"] = 36
+            #top_prior = make_prior(hparams, vqvae, device)
 
-            top_prior = make_prior(hparams, vqvae, device)
+            loaded = True
 
-        taggram, tags, features = extractor(
-            input_path, model="MSD_musicnn_big", extract_features=True
-        )
-        representation = np.concatenate(
-            [features[k].mean(axis=0) for k in args.representations.split(",")]
-        )
+        # Decode, resample, convert to mono, and normalize audio
+        audio, sr = librosa.load(input_path, sr=SAMPLE_RATE)
+        if audio.ndim == 1:
+            audio = audio[np.newaxis]
+        audio = audio.mean(axis=0)
+        norm_factor = np.abs(audio).max()
+        if norm_factor > 0:
+            audio /= norm_factor
+
+        # Crop audio to first ~24 seconds
+        audio = audio[:FRAME_HOP_LENGTH*NUM_FRAMES]
+
+        with torch.no_grad():
+            # Codify
+            audio = torch.tensor(audio[np.newaxis, :, np.newaxis], dtype=torch.float32, device=device)
+            audio_codified = vqvae.encode(audio)[-1].unsqueeze(dim=0)
 
         np.save(output_path, representation)
