@@ -92,7 +92,7 @@ def get_acts_from_file(fpath, hps, vqvae, top_prior, meanpool=True):
     acts = get_final_activations(z, x_cond, y_cond, top_prior)
 
     # postprocessing
-    acts = acts.squeeze().type(torch.float16)
+    acts = acts.squeeze().type(torch.float32)
 
     if meanpool:
         acts = acts.mean(dim=0)
