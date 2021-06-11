@@ -14,7 +14,6 @@ RUN python -m pip install --no-cache-dir --upgrade pip setuptools
 
 # Install deps
 RUN apt-get install -y wget unzip
-RUN apt-get install -y ffmpeg
 RUN apt-get install -y libsndfile1-dev
 RUN python -m pip install --no-cache-dir librosa==0.8.1
 
