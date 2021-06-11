@@ -1,6 +1,6 @@
-import torch
 import librosa as lr
 import numpy as np
+import torch
 
 JUKEBOX_SAMPLE_RATE = 44100
 T = 8192
@@ -29,7 +29,7 @@ def get_z(audio, vqvae):
     z = zs[-1].flatten()[np.newaxis, :]
 
     if z.shape[-1] < 8192:
-        raise ValueError('Audio file is not long enough')
+        raise ValueError("Audio file is not long enough")
 
     return z
 
@@ -174,6 +174,8 @@ if __name__ == "__main__":
 
         # Decode, resample, convert to mono, and normalize audio
         with torch.no_grad():
-            representation = get_acts_from_file(input_path, hps, vqvae, top_prior, meanpool=True)
+            representation = get_acts_from_file(
+                input_path, hps, vqvae, top_prior, meanpool=True
+            )
 
         np.save(output_path, representation)
