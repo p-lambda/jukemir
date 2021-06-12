@@ -87,13 +87,14 @@ class ProbeExperimentConfig(dict):
         "dataset": None,
         "representation": None,
         "data_standardization": True,
-        "hidden_layer_sizes": [512],
+        "hidden_layer_sizes": [],
         "batch_size": 64,
-        "learning_rate": 1e-5,
+        "learning_rate": 1e-3,
         "dropout_input": True,
         "dropout_p": 0.5,
         "l2_weight_decay": None,
         "max_num_epochs": None,
+        "early_stopping_metric": "-loss",
         "early_stopping": True,
         "early_stopping_eval_frequency": 8,
         "early_stopping_boredom": 256,
@@ -130,7 +131,6 @@ class ProbeExperiment:
     def __init__(
         self,
         cfg,
-        wandb=False,
         pretrained_scaler=None,
         pretrained_probe=None,
         summarize_frequency=8,
@@ -141,7 +141,6 @@ class ProbeExperiment:
             raise ValueError("No termination criteria specified")
 
         self.cfg = cfg
-        self.wandb = wandb
         self.scaler = pretrained_scaler
         self.probe = pretrained_probe
         self.summarize_frequency = summarize_frequency
@@ -198,9 +197,12 @@ class ProbeExperiment:
             raise NotImplementedError()
         return loss
 
-    def train(self):
-        if self.wandb:
+    def train(self, wandb=False):
+        if wandb:
             import wandb as wandb_lib
+
+            wandb_lib.init(project="jukemir", name=f"{self.cfg['dataset']}-{self.cfg['representation']}-{self.cfg.uid()}", reinit=True)
+            wandb_lib.config.update(self.cfg)
 
         # Set seed
         random.seed(self.cfg["seed"])
@@ -241,7 +243,7 @@ class ProbeExperiment:
 
         # Train model
         step = 0
-        early_stopping_best_loss = float("inf")
+        early_stopping_best_score = float("-inf")
         early_stopping_boredom = 0
         early_stopping_state_dict = None
         while True:
@@ -264,22 +266,26 @@ class ProbeExperiment:
                     break
                 with torch.no_grad():
                     self.probe.eval()
-                    loss = self.eval("valid")["loss"]
+                    metrics = self.eval("valid")
+                    if self.cfg["early_stopping_metric"].startswith('-'):
+                        score = -1 * metrics[self.cfg["early_stopping_metric"][1:]]
+                    else:
+                        score = metrics[self.cfg["early_stopping_metric"]]
                     self.probe.train()
-                    logging.info(f"eval,{step},{loss}")
-                    if self.wandb:
+                    logging.info(f"eval,{step},{score}")
+                    if wandb:
                         wandb_lib.log(
                             {
-                                "early_stopping_loss": loss,
-                                "early_stopping_best_loss": early_stopping_best_loss,
+                                "early_stopping_score": score,
+                                "early_stopping_best_score": early_stopping_best_score,
                                 "early_stopping_boredom": early_stopping_boredom,
                             },
                             step=step,
                         )
-                    if math.isnan(loss):
-                        raise Exception("NaN loss")
-                    if loss < early_stopping_best_loss:
-                        early_stopping_best_loss = loss
+                    if math.isnan(score):
+                        raise Exception("NaN score")
+                    if score > early_stopping_best_score:
+                        early_stopping_best_score = score
                         early_stopping_boredom = 0
                         # NOTE: This is just an ignorant way to copy the state dict
                         # TODO: Reduce ignorance?
@@ -310,7 +316,7 @@ class ProbeExperiment:
             if step % self.summarize_frequency == 0:
                 loss = loss.item()
                 logging.debug(f"train,{step},{loss}")
-                if self.wandb:
+                if wandb:
                     wandb_lib.log({"train_loss": loss}, step=step)
 
     def eval_logits(self, X):
@@ -348,7 +354,7 @@ class ProbeExperiment:
             logits = logits.cpu().numpy()
 
         # Copute task-specific metrics
-        if self.cfg["dataset"] == "test":
+        if self.cfg["dataset"] in ["test", "gtzan_ff"]:
             y_preds = np.argmax(logits, axis=1)
             y_correct = y_preds == y
             metrics["accuracy"] = y_correct.astype(np.float32).mean()
