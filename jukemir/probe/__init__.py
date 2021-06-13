@@ -23,13 +23,11 @@ DATASET_TO_ATTRS = {
     "test": {
         "num_outputs": 4,
         "output_type": "multiclass",
-        "max_num_epochs": None,
         "labels": ["0", "1", "2", "3"],
     },
     "gtzan_ff": {
         "num_outputs": 10,
         "output_type": "multiclass",
-        "max_num_epochs": None,
         "labels": """blues, classical, country, disco, hiphop, jazz, metal, pop, reggae, rock""".split(
             ", "
         ),
@@ -37,7 +35,6 @@ DATASET_TO_ATTRS = {
     "giantsteps_clips": {
         "num_outputs": 24,
         "output_type": "multiclass",
-        "max_num_epochs": 512,
         "labels": """C major, Db major, D major, Eb major, E major, F major, Gb major, G major, Ab major, A major, Bb major, B major, C minor, Db minor, D minor, Eb minor, E minor, F minor, Gb minor, G minor, Ab minor, A minor, Bb minor, B minor""".split(
             ", "
         ),
@@ -45,7 +42,6 @@ DATASET_TO_ATTRS = {
     "magnatagatune": {
         "num_outputs": 50,
         "output_type": "multilabel",
-        "max_num_epochs": 128,
         "labels": """guitar, classical, slow, techno, strings, drums, electronic, rock, fast, piano, ambient, beat, violin, vocal, synth, female, indian, opera, male, singing, vocals, no vocals, harpsichord, loud, quiet, flute, woman, male vocal, no vocal, pop, soft, sitar, solo, man, classic, choir, voice, new age, dance, male voice, female vocal, beats, harp, cello, no voice, weird, country, metal, female voice, choral""".split(
             ", "
         ),
@@ -53,7 +49,6 @@ DATASET_TO_ATTRS = {
     "emomusic": {
         "num_outputs": 2,
         "output_type": "regression",
-        "max_num_epochs": 4096,
         "labels": None,
     },
 }
