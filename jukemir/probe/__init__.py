@@ -1,4 +1,3 @@
-from collections import defaultdict
 import json
 import logging
 import math
@@ -6,12 +5,14 @@ import pathlib
 import pickle
 import random
 import tempfile
+from collections import defaultdict
 
 import mir_eval
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from scipy.stats import mode as scipy_mode
 from sklearn.metrics import average_precision_score, r2_score, roc_auc_score
 from sklearn.preprocessing import StandardScaler
 
@@ -405,10 +406,12 @@ class ProbeExperiment:
             y_correct = y_preds == y
             metrics["accuracy"] = y_correct.astype(np.float32).mean()
         elif self.cfg["dataset"] == "giantsteps_clips":
-            primary_metric_name = "clip_score"
+            primary_metric_name = "score"
 
             # Get clip probabilities
+            clip_logits = logits
             clip_labels = y
+            clip_preds = np.argmax(logits, axis=1)
             with torch.no_grad():
                 clip_probs = (
                     F.softmax(torch.tensor(logits, device=self.device), dim=-1)
@@ -417,14 +420,39 @@ class ProbeExperiment:
                 )
 
             # Aggregate songs
-            song_uid_to_clip_uids = defaultdict(list)
+            song_uid_to_clip_idxs = defaultdict(list)
             song_uid_to_label = {}
-            for clip_uid, label in zip(uids, y):
+            for clip_idx, (clip_uid, label) in enumerate(zip(uids, y)):
                 song_uid, _ = clip_uid.split("-")
-                song_uid_to_clip_uids[song_uid].append(clip_uid)
+                song_uid_to_clip_idxs[song_uid].append(clip_idx)
                 if song_uid in song_uid_to_label:
                     assert song_uid_to_label[song_uid] == label
                 song_uid_to_label[song_uid] = label
+            song_uids = sorted(song_uid_to_clip_uids.keys())
+            song_labels = np.array(
+                [song_uid_to_label[song_uid] for song_uid in song_uids]
+            )
+
+            # Ensemble predictions
+            ensemble_strategy_to_preds = defaultdict(list)
+            for song_uid in song_uids:
+                clip_idxs = song_uid_to_clip_idxs[song_uid]
+
+                song_clip_logits = clip_logits[clip_idxs]
+                song_clip_preds = clip_preds[clip_idxs]
+                song_clip_probs = clip_probs[clip_idxs]
+                ensemble_strategy_to_song_predictions["vote"].append(
+                    scipy_mode(song_clip_preds).mode[0]
+                )
+                ensemble_strategy_to_song_predictions["max"].append(
+                    song_clip_logits.max(axis=0).argmax()
+                )
+                ensemble_strategy_to_song_predictions["gmean"].append(
+                    song_clip_logits.mean(axis=0).argmax()
+                )
+                ensemble_strategy_to_song_predictions["mean"].append(
+                    song_clip_probs.mean(axis=0).argmax()
+                )
 
             def _compute_accuracy_and_scores(preds, labels):
                 id_to_label = DATASET_TO_ATTRS["giantsteps_clips"]["labels"]
@@ -439,16 +467,36 @@ class ProbeExperiment:
                 return accuracy, np.mean(scores)
 
             # Compute all metrics
-            for prefix, preds, labels in [
+            comparisons = [
                 (
                     "clip",
                     np.argmax(clip_probs, axis=1),
                     clip_labels,
                 )
-            ]:
+            ]
+            comparisons += [
+                (f"ensemble_{strategy_name}", strategy_preds, song_labels)
+                for strategy_name, strategy_preds in ensemble_strategy_to_preds.items()
+            ]
+            for prefix, preds, labels in comparisons:
                 accuracy, score = _compute_accuracy_and_scores(preds, labels)
                 metrics[f"{prefix}_accuracy"] = accuracy
                 metrics[f"{prefix}_score"] = score
+
+            # Find best ensemble strategy
+            if uids_or_split_name == "valid":
+                validation_metrics = metrics
+            else:
+                validation_metrics = self.eval("valid")
+            best_strategy_name = None
+            best_score = float("-inf")
+            for strategy_name in ensemble_strategy_to_preds.keys():
+                score = validation_metrics[f"{strategy_name}_score"]
+                if score > best_score:
+                    best_strategy_name = strategy_name
+                    best_score = score
+            metrics[f"accuracy"] = metrics[f"{best_strategy_name}_accuracy"]
+            metrics[f"score"] = metrics[f"{best_strategy_name}_score"]
 
         elif self.cfg["dataset"] == "magnatagatune":
             primary_metric_name = "auc_roc"
