@@ -174,6 +174,10 @@ class ProbeExperiment:
         for uid, attrs in data.items():
             self.split_to_uids[attrs["split"]].append(uid)
         self.split_to_uids = {k: sorted(v) for k, v in self.split_to_uids.items()}
+        for split in ["train", "valid", "test"]:
+            if self.cfg["seed"] is not None:
+                random.seed(self.cfg["seed"])
+            random.shuffle(self.split_to_uids[split])
         for split, uids in self.split_to_uids.items():
             if len(uids) == 0:
                 raise Exception("Empty split")
@@ -201,13 +205,18 @@ class ProbeExperiment:
         if wandb:
             import wandb as wandb_lib
 
-            wandb_lib.init(project="jukemir", name=f"{self.cfg['dataset']}-{self.cfg['representation']}-{self.cfg.uid()}", reinit=True)
+            wandb_lib.init(
+                project="jukemir",
+                name=f"{self.cfg['dataset']}-{self.cfg['representation']}-{self.cfg.uid()}",
+                reinit=True,
+            )
             wandb_lib.config.update(self.cfg)
 
         # Set seed
-        random.seed(self.cfg["seed"])
-        torch.manual_seed(self.cfg["seed"])
-        torch.cuda.manual_seed_all(self.cfg["seed"])
+        if self.cfg["seed"] is not None:
+            random.seed(self.cfg["seed"])
+            torch.manual_seed(self.cfg["seed"])
+            torch.cuda.manual_seed_all(self.cfg["seed"])
 
         # Create model
         logging.info("Creating model")
@@ -267,7 +276,7 @@ class ProbeExperiment:
                 with torch.no_grad():
                     self.probe.eval()
                     metrics = self.eval("valid")
-                    if self.cfg["early_stopping_metric"].startswith('-'):
+                    if self.cfg["early_stopping_metric"].startswith("-"):
                         score = -1 * metrics[self.cfg["early_stopping_metric"][1:]]
                     else:
                         score = metrics[self.cfg["early_stopping_metric"]]
