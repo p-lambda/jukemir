@@ -10,8 +10,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from sklearn.metrics import average_precision_score, r2_score, roc_auc_score
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import roc_auc_score, average_precision_score
 
 from .. import CACHE_DIR
 from ..utils import compute_checksum
@@ -26,7 +26,7 @@ DATASET_TO_ATTRS = {
     "gtzan_ff": {
         "num_outputs": 10,
         "output_type": "multiclass",
-        "max_num_epochs": None,
+        "max_num_epochs": 4096,
         "labels": """blues, classical, country, disco, hiphop, jazz, metal, pop, reggae, rock""".split(
             ", "
         ),
@@ -159,7 +159,7 @@ class ProbeExperiment:
         ) as f:
             data = json.load(f)
         for uid in data.keys():
-            if data[uid]['split'] not in ['train', 'valid', 'test']:
+            if data[uid]["split"] not in ["train", "valid", "test"]:
                 continue
             data[uid]["x"] = np.load(
                 pathlib.Path(
@@ -175,7 +175,7 @@ class ProbeExperiment:
         self.split_to_X = {}
         self.split_to_y = {}
         for uid, attrs in data.items():
-            if data[uid]['split'] not in ['train', 'valid', 'test']:
+            if data[uid]["split"] not in ["train", "valid", "test"]:
                 continue
             self.split_to_uids[attrs["split"]].append(uid)
         self.split_to_uids = {k: sorted(v) for k, v in self.split_to_uids.items()}
@@ -195,11 +195,13 @@ class ProbeExperiment:
             raise Exception()
 
     def raw_labels_to_targets(self, y):
-        id_to_label = DATASET_TO_ATTRS[self.cfg["dataset"]]["labels"]
-        label_to_id = {v: k for k, v in enumerate(id_to_label)}
-        assert len(id_to_label) == len(label_to_id)
-
         output_type = DATASET_TO_ATTRS[self.cfg["dataset"]]["output_type"]
+
+        if output_type != "regression":
+            id_to_label = DATASET_TO_ATTRS[self.cfg["dataset"]]["labels"]
+            label_to_id = {v: k for k, v in enumerate(id_to_label)}
+            assert len(id_to_label) == len(label_to_id)
+
         num_outputs = DATASET_TO_ATTRS[self.cfg["dataset"]]["num_outputs"]
         if output_type == "multiclass":
             targets = np.array([label_to_id[yi] for yi in y], dtype=np.int64)
@@ -209,7 +211,7 @@ class ProbeExperiment:
                 for t in tags:
                     targets[i, label_to_id[t]] = 1
         elif output_type == "regression":
-            raise NotImplementedError()
+            targets = np.array(y, dtype=np.float32)
         else:
             raise NotImplementedError()
 
@@ -220,8 +222,11 @@ class ProbeExperiment:
         if output_type == "multiclass":
             loss = F.cross_entropy(logits, y, reduction="mean")
         elif output_type == "multilabel":
-            loss = F.binary_cross_entropy_with_logits(logits, y.float(), reduction="mean")
+            loss = F.binary_cross_entropy_with_logits(
+                logits, y.float(), reduction="mean"
+            )
         elif output_type == "regression":
+            # TODO: Optimize R2 directly? https://stackoverflow.com/questions/65840698/how-to-make-r2-score-in-nn-lstm-pytorch
             loss = F.mse_loss(logits, y, reduction="mean")
         else:
             raise NotImplementedError()
@@ -400,9 +405,18 @@ class ProbeExperiment:
         elif self.cfg["dataset"] == "magnatagatune":
             primary_metric_name = "auc_roc"
             with torch.no_grad():
-                y_probs = torch.sigmoid(torch.tensor(logits, device=self.device)).cpu().numpy()
+                y_probs = (
+                    torch.sigmoid(torch.tensor(logits, device=self.device))
+                    .cpu()
+                    .numpy()
+                )
             metrics["auc_roc"] = roc_auc_score(y, y_probs, average="macro")
             metrics["ap"] = average_precision_score(y, y_probs, average="macro")
+        elif self.cfg["dataset"] == "emomusic":
+            primary_metric_name = "r2"
+            metrics["r2"] = r2_score(y, logits)
+            metrics["arousal_r2"] = r2_score(y[:, 0], logits[:, 0])
+            metrics["valence_r2"] = r2_score(y[:, 1], logits[:, 1])
         else:
             raise NotImplementedError()
 
