@@ -94,7 +94,7 @@ class ProbeExperimentConfig(dict):
         "dropout_p": 0.5,
         "l2_weight_decay": None,
         "max_num_epochs": None,
-        "early_stopping_metric": "-loss",
+        "early_stopping_metric": "primary",
         "early_stopping": True,
         "early_stopping_eval_frequency": 8,
         "early_stopping_boredom": 256,
@@ -189,16 +189,38 @@ class ProbeExperiment:
         if len(set(X.shape[1] for X in self.split_to_X.values())) != 1:
             raise Exception()
 
-    def labels_to_ids(self, y):
+    def raw_labels_to_targets(self, y):
         id_to_label = DATASET_TO_ATTRS[self.cfg["dataset"]]["labels"]
         label_to_id = {v: k for k, v in enumerate(id_to_label)}
-        return np.array([label_to_id[yi] for yi in y], dtype=np.int64)
+        assert len(id_to_label) == len(label_to_id)
 
-    def compute_loss(self, logits, y):
-        if DATASET_TO_ATTRS[self.cfg["dataset"]]["output_type"] == "multiclass":
-            loss = F.cross_entropy(logits, y, reduction="mean")
+        output_type = DATASET_TO_ATTRS[self.cfg["dataset"]]["output_type"]
+        num_outputs = DATASET_TO_ATTRS[self.cfg["dataset"]]["num_outputs"]
+        if output_type == "multiclass":
+            targets = np.array([label_to_id[yi] for yi in y], dtype=np.int64)
+        elif output_type == "multilabel":
+            targets = np.zeros((len(y), num_outputs), dtype=np.uint8)
+            for i, tags in enumerate(y):
+                for t in tags:
+                    targets[i, label_to_id[t]] = 1
+        elif output_type == "regression":
+            raise NotImplementedError()
         else:
             raise NotImplementedError()
+
+        return targets
+
+    def compute_loss(self, logits, y):
+        output_type = DATASET_TO_ATTRS[self.cfg["dataset"]]["output_type"]
+        if output_type == "multiclass":
+            loss = F.cross_entropy(logits, y, reduction="mean")
+        elif output_type == "multilabel":
+            loss = F.binary_cross_entropy_with_logits(logits, y, reduction="mean")
+        elif output_type == "regression":
+            loss = F.mse_loss(logits, y, reduction="mean")
+        else:
+            raise NotImplementedError()
+
         return loss
 
     def train(self, wandb=False):
@@ -241,7 +263,7 @@ class ProbeExperiment:
 
         # Retrieve dataset
         X_train = self.split_to_X["train"]
-        y_train = self.labels_to_ids(self.split_to_y["train"])
+        y_train = self.raw_labels_to_targets(self.split_to_y["train"])
 
         # Fit scaler
         self.scaler = StandardScaler(
@@ -283,14 +305,14 @@ class ProbeExperiment:
                     self.probe.train()
                     logging.info(f"eval,{step},{score}")
                     if wandb:
-                        wandb_lib.log(
+                        metrics.update(
                             {
                                 "early_stopping_score": score,
                                 "early_stopping_best_score": early_stopping_best_score,
                                 "early_stopping_boredom": early_stopping_boredom,
-                            },
-                            step=step,
+                            }
                         )
+                        wandb_lib.log(metrics, step=step)
                     if math.isnan(score):
                         raise Exception("NaN score")
                     if score > early_stopping_best_score:
@@ -351,8 +373,10 @@ class ProbeExperiment:
             y = self.split_to_y[split_name]
         else:
             uids = uids_or_split_name
-        y = self.labels_to_ids(y)
+        y = self.raw_labels_to_targets(y)
+
         metrics = {}
+        primary_metric_name = None
 
         # Compute logits / task-specific loss
         with torch.no_grad():
@@ -364,9 +388,16 @@ class ProbeExperiment:
 
         # Copute task-specific metrics
         if self.cfg["dataset"] in ["test", "gtzan_ff"]:
+            primary_metric_name = "accuracy"
             y_preds = np.argmax(logits, axis=1)
             y_correct = y_preds == y
             metrics["accuracy"] = y_correct.astype(np.float32).mean()
+        elif self.cfg["dataset"] == "magnatagatune":
+            primary_metric_name = "auc_roc"
+            with torch.no_grad():
+                y_probs = torch.sigmoid(logits).cpu().numpy()
+            metrics["auc_roc"] = roc_auc_score(y, y_probs, average="macro")
+            metrics["ap"] = average_precision_score(y, y_probes, average="macro")
         else:
             raise NotImplementedError()
 
@@ -375,6 +406,8 @@ class ProbeExperiment:
             if isinstance(v, (np.ndarray, np.generic)):
                 metrics[k] = v.tolist()
 
+        assert "primary" not in metrics
+        metrics["primary"] = metrics[primary_metric_name]
         return metrics
 
     def save(self, root_dir):
