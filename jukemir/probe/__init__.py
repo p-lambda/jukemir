@@ -428,34 +428,35 @@ class ProbeExperiment:
                 if song_uid in song_uid_to_label:
                     assert song_uid_to_label[song_uid] == label
                 song_uid_to_label[song_uid] = label
-            song_uids = sorted(song_uid_to_clip_uids.keys())
+            song_uids = sorted(song_uid_to_clip_idxs.keys())
             song_labels = np.array(
                 [song_uid_to_label[song_uid] for song_uid in song_uids]
             )
 
             # Ensemble predictions
-            ensemble_strategy_to_preds = defaultdict(list)
+            ensemble_strategy_to_song_preds = defaultdict(list)
             for song_uid in song_uids:
                 clip_idxs = song_uid_to_clip_idxs[song_uid]
 
                 song_clip_logits = clip_logits[clip_idxs]
                 song_clip_preds = clip_preds[clip_idxs]
                 song_clip_probs = clip_probs[clip_idxs]
-                ensemble_strategy_to_song_predictions["vote"].append(
+                ensemble_strategy_to_song_preds["vote"].append(
                     scipy_mode(song_clip_preds).mode[0]
                 )
-                ensemble_strategy_to_song_predictions["max"].append(
+                ensemble_strategy_to_song_preds["max"].append(
                     song_clip_logits.max(axis=0).argmax()
                 )
-                ensemble_strategy_to_song_predictions["gmean"].append(
+                ensemble_strategy_to_song_preds["gmean"].append(
                     song_clip_logits.mean(axis=0).argmax()
                 )
-                ensemble_strategy_to_song_predictions["mean"].append(
+                ensemble_strategy_to_song_preds["mean"].append(
                     song_clip_probs.mean(axis=0).argmax()
                 )
 
             def _compute_accuracy_and_scores(preds, labels):
                 id_to_label = DATASET_TO_ATTRS["giantsteps_clips"]["labels"]
+                assert preds.shape == labels.shape
                 correct = preds == labels
                 accuracy = correct.astype(np.float32).mean()
                 scores = [
@@ -475,8 +476,8 @@ class ProbeExperiment:
                 )
             ]
             comparisons += [
-                (f"ensemble_{strategy_name}", strategy_preds, song_labels)
-                for strategy_name, strategy_preds in ensemble_strategy_to_preds.items()
+                (f"ensemble_{strategy_name}", np.array(strategy_preds), song_labels)
+                for strategy_name, strategy_preds in ensemble_strategy_to_song_preds.items()
             ]
             for prefix, preds, labels in comparisons:
                 accuracy, score = _compute_accuracy_and_scores(preds, labels)
@@ -490,13 +491,13 @@ class ProbeExperiment:
                 validation_metrics = self.eval("valid")
             best_strategy_name = None
             best_score = float("-inf")
-            for strategy_name in ensemble_strategy_to_preds.keys():
-                score = validation_metrics[f"{strategy_name}_score"]
+            for strategy_name in ensemble_strategy_to_song_preds.keys():
+                score = validation_metrics[f"ensemble_{strategy_name}_score"]
                 if score > best_score:
                     best_strategy_name = strategy_name
                     best_score = score
-            metrics[f"accuracy"] = metrics[f"{best_strategy_name}_accuracy"]
-            metrics[f"score"] = metrics[f"{best_strategy_name}_score"]
+            metrics[f"accuracy"] = metrics[f"ensemble_{best_strategy_name}_accuracy"]
+            metrics[f"score"] = metrics[f"ensemble_{best_strategy_name}_score"]
 
         elif self.cfg["dataset"] == "magnatagatune":
             primary_metric_name = "auc_roc"
