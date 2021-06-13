@@ -29,7 +29,7 @@ DATASET_TO_ATTRS = {
     "gtzan_ff": {
         "num_outputs": 10,
         "output_type": "multiclass",
-        "max_num_epochs": 4096,
+        "max_num_epochs": None,
         "labels": """blues, classical, country, disco, hiphop, jazz, metal, pop, reggae, rock""".split(
             ", "
         ),
@@ -320,6 +320,7 @@ class ProbeExperiment:
                     if wandb:
                         metrics.update(
                             {
+                                "epoch": epoch,
                                 "early_stopping_score": score,
                                 "early_stopping_best_score": early_stopping_best_score,
                                 "early_stopping_boredom": early_stopping_boredom,
