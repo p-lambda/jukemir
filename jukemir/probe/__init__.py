@@ -6,6 +6,7 @@ import pickle
 import random
 import tempfile
 
+import mir_eval
 import numpy as np
 import torch
 import torch.nn as nn
@@ -402,6 +403,53 @@ class ProbeExperiment:
             y_preds = np.argmax(logits, axis=1)
             y_correct = y_preds == y
             metrics["accuracy"] = y_correct.astype(np.float32).mean()
+        elif self.cfg["dataset"] == "giantsteps_clips":
+            primary_metric_name = "clip_score"
+
+            # Get clip probabilities
+            clip_labels = y
+            with torch.no_grad():
+                clip_probs = (
+                    F.softmax(torch.tensor(logits, device=self.device), dim=-1)
+                    .cpu()
+                    .numpy()
+                )
+
+            # Aggregate songs
+            song_uid_to_clip_uids = defaultdict(list)
+            song_uid_to_label = {}
+            for uid, label in zip(uids, y):
+                clip_uid, song_uid = uid.split("-")
+                song_uid_to_clip_uids[song_uid].append(clip_uids)
+                if song_uid in song_uid_to_label:
+                    assert song_uid_to_label[song_uid] == label
+                song_uid_to_label[song_uid] = label
+
+            # Compute metrics
+            id_to_label = DATASET_TO_ATTRS["giantsteps_clips"]["labels"]
+
+            def _compute_accuracy_and_scores(preds, labels):
+                correct = y_preds == y
+                accuracy = correct.astype(np.float32).mean()
+                scores = [
+                    mir_eval.key.weighted_score(
+                        id_to_label[ref_key], id_to_label[est_key]
+                    )
+                    for ref_key, est_key in zip(labels, preds)
+                ]
+                return accuracy, np.mean(scores)
+
+            for prefix, preds, labels in [
+                (
+                    "clip",
+                    np.argmax(clip_probs, axis=1),
+                    clip_labels,
+                )
+            ]:
+                accuracy, scores = _compute_accuracy_and_scores(preds, labels)
+                metrics[f"{prefix}_accuracy"] = accuracy
+                metrics[f"{prefix}_score"] = score
+
         elif self.cfg["dataset"] == "magnatagatune":
             primary_metric_name = "auc_roc"
             with torch.no_grad():
