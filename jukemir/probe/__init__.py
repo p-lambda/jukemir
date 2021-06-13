@@ -11,6 +11,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import roc_auc_score, average_precision_score
 
 from .. import CACHE_DIR
 from ..utils import compute_checksum
@@ -158,6 +159,8 @@ class ProbeExperiment:
         ) as f:
             data = json.load(f)
         for uid in data.keys():
+            if data[uid]['split'] not in ['train', 'valid', 'test']:
+                continue
             data[uid]["x"] = np.load(
                 pathlib.Path(
                     self.representations_root_dir,
@@ -172,6 +175,8 @@ class ProbeExperiment:
         self.split_to_X = {}
         self.split_to_y = {}
         for uid, attrs in data.items():
+            if data[uid]['split'] not in ['train', 'valid', 'test']:
+                continue
             self.split_to_uids[attrs["split"]].append(uid)
         self.split_to_uids = {k: sorted(v) for k, v in self.split_to_uids.items()}
         for split in ["train", "valid", "test"]:
@@ -215,7 +220,7 @@ class ProbeExperiment:
         if output_type == "multiclass":
             loss = F.cross_entropy(logits, y, reduction="mean")
         elif output_type == "multilabel":
-            loss = F.binary_cross_entropy_with_logits(logits, y, reduction="mean")
+            loss = F.binary_cross_entropy_with_logits(logits, y.float(), reduction="mean")
         elif output_type == "regression":
             loss = F.mse_loss(logits, y, reduction="mean")
         else:
@@ -334,7 +339,7 @@ class ProbeExperiment:
             X, y = X_train[idxs], y_train[idxs]
             X = self.scaler.transform(X)
             X = torch.tensor(X, dtype=torch.float32, device=self.device)
-            y = torch.tensor(y, dtype=torch.int64, device=self.device)
+            y = torch.tensor(y, device=self.device)
 
             # Update
             optimizer.zero_grad()
@@ -382,7 +387,7 @@ class ProbeExperiment:
         with torch.no_grad():
             self.probe.eval()
             logits = self.eval_logits(X)
-            y_tensor = torch.tensor(y, dtype=torch.int64, device=self.device)
+            y_tensor = torch.tensor(y, device=self.device)
             metrics["loss"] = self.compute_loss(logits, y_tensor).item()
             logits = logits.cpu().numpy()
 
@@ -395,9 +400,9 @@ class ProbeExperiment:
         elif self.cfg["dataset"] == "magnatagatune":
             primary_metric_name = "auc_roc"
             with torch.no_grad():
-                y_probs = torch.sigmoid(logits).cpu().numpy()
+                y_probs = torch.sigmoid(torch.tensor(logits, device=self.device)).cpu().numpy()
             metrics["auc_roc"] = roc_auc_score(y, y_probs, average="macro")
-            metrics["ap"] = average_precision_score(y, y_probes, average="macro")
+            metrics["ap"] = average_precision_score(y, y_probs, average="macro")
         else:
             raise NotImplementedError()
 
