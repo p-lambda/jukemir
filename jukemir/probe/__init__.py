@@ -1,3 +1,4 @@
+from collections import defaultdict
 import json
 import logging
 import math
@@ -418,18 +419,16 @@ class ProbeExperiment:
             # Aggregate songs
             song_uid_to_clip_uids = defaultdict(list)
             song_uid_to_label = {}
-            for uid, label in zip(uids, y):
-                clip_uid, song_uid = uid.split("-")
-                song_uid_to_clip_uids[song_uid].append(clip_uids)
+            for clip_uid, label in zip(uids, y):
+                song_uid, _ = clip_uid.split("-")
+                song_uid_to_clip_uids[song_uid].append(clip_uid)
                 if song_uid in song_uid_to_label:
                     assert song_uid_to_label[song_uid] == label
                 song_uid_to_label[song_uid] = label
 
-            # Compute metrics
-            id_to_label = DATASET_TO_ATTRS["giantsteps_clips"]["labels"]
-
             def _compute_accuracy_and_scores(preds, labels):
-                correct = y_preds == y
+                id_to_label = DATASET_TO_ATTRS["giantsteps_clips"]["labels"]
+                correct = preds == labels
                 accuracy = correct.astype(np.float32).mean()
                 scores = [
                     mir_eval.key.weighted_score(
@@ -439,6 +438,7 @@ class ProbeExperiment:
                 ]
                 return accuracy, np.mean(scores)
 
+            # Compute all metrics
             for prefix, preds, labels in [
                 (
                     "clip",
@@ -446,7 +446,7 @@ class ProbeExperiment:
                     clip_labels,
                 )
             ]:
-                accuracy, scores = _compute_accuracy_and_scores(preds, labels)
+                accuracy, score = _compute_accuracy_and_scores(preds, labels)
                 metrics[f"{prefix}_accuracy"] = accuracy
                 metrics[f"{prefix}_score"] = score
 
