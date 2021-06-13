@@ -106,6 +106,16 @@ class Test(unittest.TestCase):
         self.assertEqual(split_counts["train"], 504)
         self.assertEqual(split_counts["valid"], 115)
         self.assertEqual(split_counts["test"], 125)
+        self.assertAlmostEqual(np.min(valences), -2.689, places=3)
+        self.assertAlmostEqual(np.max(valences), 2.492, places=3)
+        self.assertAlmostEqual(np.mean(valences), 0.026, places=3)
+        self.assertAlmostEqual(np.std(valences), 0.992, places=3)
+        self.assertAlmostEqual(np.min(arousals), -2.277, places=3)
+        self.assertAlmostEqual(np.max(arousals), 2.629, places=3)
+        self.assertAlmostEqual(np.mean(arousals), 0.022, places=3)
+        self.assertAlmostEqual(np.std(arousals), 0.992, places=3)
+        """
+        # Before normalization
         self.assertAlmostEqual(np.min(valences), 1.6, places=3)
         self.assertAlmostEqual(np.max(valences), 8.1, places=3)
         self.assertAlmostEqual(np.mean(valences), 5.006, places=3)
@@ -114,6 +124,7 @@ class Test(unittest.TestCase):
         self.assertAlmostEqual(np.max(arousals), 8.4, places=3)
         self.assertAlmostEqual(np.mean(arousals), 4.786, places=3)
         self.assertAlmostEqual(np.std(arousals), 1.375, places=3)
+        """
 
     def test_iter_giantsteps(self):
         d = {uid: metadata for uid, metadata in iter_giantsteps(metadata_only=True)}

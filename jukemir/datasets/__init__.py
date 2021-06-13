@@ -250,6 +250,27 @@ def iter_emomusic(metadata_only=False):
                             float(row["mean_arousal"]),
                         ]
 
+        # Normalize
+        arousals = [
+            metadata["y"][0]
+            for metadata in uid_to_metadata.values()
+            if metadata["split"] == "train"
+        ]
+        valences = [
+            metadata["y"][1]
+            for metadata in uid_to_metadata.values()
+            if metadata["split"] == "train"
+        ]
+        arousal_mean = np.mean(arousals)
+        arousal_std = np.std(arousals)
+        valence_mean = np.mean(valences)
+        valence_std = np.std(valences)
+        for metadata in uid_to_metadata.values():
+            metadata["y"] = [
+                (metadata["y"][0] - arousal_mean) / arousal_std,
+                (metadata["y"][1] - valence_mean) / valence_std,
+            ]
+
         ratios = ["train"] * 8 + ["valid"] * 2
         for uid, metadata in uid_to_metadata.items():
             if metadata["split"] == "train":
