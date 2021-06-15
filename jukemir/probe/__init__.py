@@ -1,3 +1,4 @@
+import itertools
 import json
 import logging
 import math
@@ -5,7 +6,7 @@ import pathlib
 import pickle
 import random
 import tempfile
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 
 import mir_eval
 import numpy as np
@@ -584,3 +585,34 @@ def execute_probe_experiment(
     exp.train(wandb=wandb)
     exp.save(root_dir=output_root_dir)
     return exp
+
+
+def grid_cfgs(dataset, representation, grid):
+    if not isinstance(grid, dict):
+        raise TypeError()
+    grid = OrderedDict(grid)
+    cfgs = []
+    if len(grid) > 0:
+        for combination in itertools.product(*grid.values()):
+            cfgs.append(
+                ProbeExperimentConfig(
+                    dataset=dataset,
+                    representation=representation,
+                    **{k: v for k, v in zip(grid.keys(), combination)},
+                )
+            )
+    return cfgs
+
+
+_PAPER_GRID = {
+    "data_standardization": [False, True],
+    "hidden_layer_sizes": [[], [512], [512, 256]],
+    "batch_size": [64, 256],
+    "learning_rate": [1e-5, 1e-4, 1e-3],
+    "dropout_p": [0.25, 0.5, 0.75],
+    "l2_weight_decay": [None, 1e-4, 1e-3],
+}
+
+
+def paper_grid_cfgs(dataset, representation):
+    return grid_cfgs(dataset, representation, _PAPER_GRID)

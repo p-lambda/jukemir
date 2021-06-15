@@ -11,6 +11,8 @@ from . import (
     ProbeExperimentConfig,
     SimpleMLP,
     execute_probe_experiment,
+    grid_cfgs,
+    paper_grid_cfgs,
 )
 
 
@@ -86,3 +88,18 @@ class Test(unittest.TestCase):
             exp_hat.load_data()
             results_hat = exp_hat.eval("test")
             self.assertEqual(results, results_hat)
+
+    def test_grid_cfgs(self):
+        cfgs = grid_cfgs("test", "test", {})
+        self.assertEqual(cfgs, [])
+        cfgs = grid_cfgs("test", "test", {"batch_size": [10]})
+        self.assertEqual(len(cfgs), 1)
+        self.assertEqual(cfgs[0]["batch_size"], 10)
+        cfgs = grid_cfgs(
+            "test", "test", {"batch_size": [10, 20], "learning_rate": [1, 2]}
+        )
+        self.assertEqual(len(cfgs), 4)
+        self.assertEqual(cfgs[-1]["batch_size"], 20)
+        self.assertEqual(cfgs[-1]["learning_rate"], 2)
+        cfgs = paper_grid_cfgs("test", "test")
+        self.assertEqual(len(cfgs), 324)
