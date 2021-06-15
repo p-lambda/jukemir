@@ -16,7 +16,7 @@ from scipy.stats import mode as scipy_mode
 from sklearn.metrics import average_precision_score, r2_score, roc_auc_score
 from sklearn.preprocessing import StandardScaler
 
-from .. import CACHE_DIR
+from .. import CACHE_DATASETS_DIR, CACHE_PROBES_DIR, CACHE_REPRESENTATIONS_DIR
 from ..utils import compute_checksum
 
 DATASET_TO_ATTRS = {
@@ -139,9 +139,9 @@ class ProbeExperiment:
         if not cfg["early_stopping"] and cfg["max_num_epochs"] is None:
             raise ValueError("No termination criteria specified")
         if datasets_root_dir is None:
-            datasets_root_dir = pathlib.Path(CACHE_DIR, "processed")
+            datasets_root_dir = CACHE_DATASETS_DIR
         if representations_root_dir is None:
-            representations_root_dir = pathlib.Path(CACHE_DIR, "representations")
+            representations_root_dir = CACHE_REPRESENTATIONS_DIR
 
         self.cfg = cfg
         self.scaler = pretrained_scaler
@@ -528,7 +528,7 @@ class ProbeExperiment:
 
     def save(self, root_dir=None):
         if root_dir is None:
-            root_dir = pathlib.Path(CACHE_DIR, "probes")
+            root_dir = CACHE_PROBES_DIR
         uid = self.cfg.uid()
         model_dir = pathlib.Path(
             root_dir, self.cfg["dataset"], self.cfg["representation"], uid
@@ -543,7 +543,7 @@ class ProbeExperiment:
             f.write(json.dumps(self.eval("valid"), indent=2, sort_keys=True))
 
     @classmethod
-    def load(cls, uid, root_dir=pathlib.Path(CACHE_DIR, "probes"), **kwargs):
+    def load(cls, uid, root_dir=CACHE_PROBES_DIR, **kwargs):
         model_dir = [d for d in pathlib.Path(root_dir).rglob(f"{uid}*") if d.is_dir()]
         if len(model_dir) < 1:
             raise ValueError("Could not find model directory")

@@ -6,7 +6,12 @@ import unittest
 
 import numpy as np
 
-from . import ProbeExperiment, ProbeExperimentConfig, SimpleMLP
+from . import (
+    ProbeExperiment,
+    ProbeExperimentConfig,
+    SimpleMLP,
+    execute_probe_experiment,
+)
 
 
 class Test(unittest.TestCase):
@@ -35,9 +40,10 @@ class Test(unittest.TestCase):
         cfg = ProbeExperimentConfig(
             dataset="test", representation="test", max_num_epochs=100, dropout_p=0
         )
-        with tempfile.TemporaryDirectory() as ddir, tempfile.TemporaryDirectory() as rdir:
+        with tempfile.TemporaryDirectory() as ddir, tempfile.TemporaryDirectory() as rdir, tempfile.TemporaryDirectory() as odir:
             ddir = pathlib.Path(ddir)
             rdir = pathlib.Path(rdir)
+            odir = pathlib.Path(odir)
 
             pathlib.Path(ddir, "test").mkdir()
             pathlib.Path(rdir, "test", "test").mkdir(parents=True)
@@ -57,29 +63,26 @@ class Test(unittest.TestCase):
                 f.write(json.dumps(meta))
 
             # Train
-            exp = ProbeExperiment(
+            exp = execute_probe_experiment(
                 cfg,
-                datasets_root_dir=pathlib.Path(ddir),
-                representations_root_dir=pathlib.Path(rdir),
+                output_root_dir=odir,
+                datasets_root_dir=ddir,
+                representations_root_dir=rdir,
             )
-            exp.load_data()
-            exp.train()
 
             # Evaluate
             results = exp.eval("test")
             self.assertEqual(results["accuracy"], 1)
             self.assertLess(abs(results["loss"] - 0.09166), 0.01)
 
-            # Save/load model
+            # Load saved model
             uid = exp.cfg.uid()
-            with tempfile.TemporaryDirectory() as odir:
-                exp.save(root_dir=odir)
-                exp_hat = ProbeExperiment.load(
-                    uid,
-                    root_dir=odir,
-                    datasets_root_dir=pathlib.Path(ddir),
-                    representations_root_dir=pathlib.Path(rdir),
-                )
+            exp_hat = ProbeExperiment.load(
+                uid,
+                root_dir=odir,
+                datasets_root_dir=ddir,
+                representations_root_dir=rdir,
+            )
             exp_hat.load_data()
             results_hat = exp_hat.eval("test")
             self.assertEqual(results, results_hat)
