@@ -17,7 +17,7 @@ class Test(unittest.TestCase):
 
     def test_probe_experiment_config(self):
         cfg = ProbeExperimentConfig(dataset="debug", representation="debug")
-        self.assertEqual(cfg.uid(), "7be3e1acd7723d7c7537d85b17584b605994acd8")
+        self.assertEqual(cfg.uid(), "931d09133314c180443615815249a7415da09c86")
         with self.assertRaisesRegex(ValueError, "Required field"):
             ProbeExperimentConfig()
         with self.assertRaisesRegex(ValueError, "Unknown field"):
@@ -59,7 +59,7 @@ class Test(unittest.TestCase):
             # Train
             exp = ProbeExperiment(
                 cfg,
-                dataset_root_dir=pathlib.Path(ddir),
+                datasets_root_dir=pathlib.Path(ddir),
                 representations_root_dir=pathlib.Path(rdir),
             )
             exp.load_data()
@@ -68,16 +68,16 @@ class Test(unittest.TestCase):
             # Evaluate
             results = exp.eval("test")
             self.assertEqual(results["accuracy"], 1)
-            self.assertLess(abs(results["loss"] - 0.3611), 0.01)
+            self.assertLess(abs(results["loss"] - 0.09166), 0.01)
 
             # Save/load model
             uid = exp.cfg.uid()
             with tempfile.TemporaryDirectory() as odir:
-                exp.save(odir)
+                exp.save(root_dir=odir)
                 exp_hat = ProbeExperiment.load(
-                    odir,
                     uid,
-                    dataset_root_dir=pathlib.Path(ddir),
+                    root_dir=odir,
+                    datasets_root_dir=pathlib.Path(ddir),
                     representations_root_dir=pathlib.Path(rdir),
                 )
             exp_hat.load_data()

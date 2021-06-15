@@ -4,10 +4,10 @@ from jukemir import CACHE_DIR
 
 REPRESENTATIONS = ["chroma", "mfcc", "choi", "musicnn", "clmr", "jukebox"]
 DATASET_SIZES = [
-    ("emomusic", 744),
     ("gtzan_ff", 930),
-    ("magnatagatune", 25860),
     ("giantsteps_clips", 7035),
+    ("magnatagatune", 25860),
+    ("emomusic", 744),
 ]
 BATCH_SIZE = 256
 CMD_TEMPLATE = """

@@ -112,7 +112,7 @@ def retrieve_and_or_verify_asset(
         except Exception as e:
             if path.is_file():
                 path.unlink()
-            raise Exception("Download failed: {e}")
+            raise Exception(f"Download failed: {e}")
     assert path.is_file()
 
     # Ensure file integrity

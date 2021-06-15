@@ -133,17 +133,21 @@ class ProbeExperiment:
         pretrained_scaler=None,
         pretrained_probe=None,
         summarize_frequency=8,
-        dataset_root_dir=pathlib.Path(CACHE_DIR, "processed"),
-        representations_root_dir=pathlib.Path(CACHE_DIR, "representations"),
+        datasets_root_dir=None,
+        representations_root_dir=None,
     ):
         if not cfg["early_stopping"] and cfg["max_num_epochs"] is None:
             raise ValueError("No termination criteria specified")
+        if datasets_root_dir is None:
+            datasets_root_dir = pathlib.Path(CACHE_DIR, "processed")
+        if representations_root_dir is None:
+            representations_root_dir = pathlib.Path(CACHE_DIR, "representations")
 
         self.cfg = cfg
         self.scaler = pretrained_scaler
         self.probe = pretrained_probe
         self.summarize_frequency = summarize_frequency
-        self.dataset_root_dir = dataset_root_dir
+        self.datasets_root_dir = datasets_root_dir
         self.representations_root_dir = representations_root_dir
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         if self.probe is not None:
@@ -153,7 +157,7 @@ class ProbeExperiment:
         # Load data from disk
         logging.info("Loading data")
         with open(
-            pathlib.Path(self.dataset_root_dir, self.cfg["dataset"], "meta.json"), "r"
+            pathlib.Path(self.datasets_root_dir, self.cfg["dataset"], "meta.json"), "r"
         ) as f:
             data = json.load(f)
         for uid in data.keys():
@@ -522,10 +526,12 @@ class ProbeExperiment:
         metrics["primary"] = metrics[primary_metric_name]
         return metrics
 
-    def save(self, root_dir):
+    def save(self, root_dir=pathlib.Path(CACHE_DIR, "probes")):
         uid = self.cfg.uid()
-        model_dir = pathlib.Path(root_dir, uid)
-        model_dir.mkdir(exist_ok=True)
+        model_dir = pathlib.Path(
+            root_dir, self.cfg["dataset"], self.cfg["representation"], uid
+        )
+        model_dir.mkdir(parents=True, exist_ok=True)
         with open(pathlib.Path(model_dir, f"cfg.json"), "w") as f:
             f.write(json.dumps(self.cfg, indent=2, sort_keys=True))
         with open(pathlib.Path(model_dir, f"scaler.pkl"), "wb") as f:
@@ -535,8 +541,11 @@ class ProbeExperiment:
             f.write(json.dumps(self.eval("valid"), indent=2, sort_keys=True))
 
     @classmethod
-    def load(cls, root_dir, uid, **kwargs):
-        model_dir = pathlib.Path(root_dir, uid)
+    def load(cls, uid, root_dir=pathlib.Path(CACHE_DIR, "probes"), **kwargs):
+        model_dir = [d for d in pathlib.Path(root_dir).rglob(f"{uid}*") if d.is_dir()]
+        if len(model_dir) < 1:
+            raise ValueError("Could not find model directory")
+        model_dir = model_dir[0]
         with open(pathlib.Path(model_dir, f"cfg.json"), "r") as f:
             cfg = json.load(f)
         with open(pathlib.Path(model_dir, f"scaler.pkl"), "rb") as f:
@@ -545,7 +554,7 @@ class ProbeExperiment:
         if len(cfg["hidden_layer_sizes"]) > 0:
             input_layer = "hidden_0.weight"
         else:
-            input_layer = "output"
+            input_layer = "output.weight"
         probe = SimpleMLP(
             state_dict[input_layer].shape[1],
             cfg["hidden_layer_sizes"],
@@ -555,3 +564,21 @@ class ProbeExperiment:
         )
         probe.load_state_dict(state_dict)
         return cls(cfg, pretrained_scaler=scaler, pretrained_probe=probe, **kwargs)
+
+
+def execute_probe_experiment(
+    cfg,
+    wandb=False,
+    output_root_dir=None,
+    datasets_root_dir=None,
+    representations_root_dir=None,
+):
+    exp = ProbeExperiment(
+        cfg,
+        datasets_root_dir=datasets_root_dir,
+        representations_root_dir=representations_root_dir,
+    )
+    exp.load_data()
+    exp.train(wandb=wandb)
+    exp.save(output_root_dir)
+    return exp
