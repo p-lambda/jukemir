@@ -526,7 +526,9 @@ class ProbeExperiment:
         metrics["primary"] = metrics[primary_metric_name]
         return metrics
 
-    def save(self, root_dir=pathlib.Path(CACHE_DIR, "probes")):
+    def save(self, root_dir=None):
+        if root_dir is None:
+            root_dir = pathlib.Path(CACHE_DIR, "probes")
         uid = self.cfg.uid()
         model_dir = pathlib.Path(
             root_dir, self.cfg["dataset"], self.cfg["representation"], uid
@@ -580,5 +582,5 @@ def execute_probe_experiment(
     )
     exp.load_data()
     exp.train(wandb=wandb)
-    exp.save(output_root_dir)
+    exp.save(root_dir=output_root_dir)
     return exp

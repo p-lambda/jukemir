@@ -60,17 +60,10 @@ A Python script at [`scripts/3_extract.py`](scripts/3_extract.py) will generate 
 Individual probing experiments are defined using a `jukemir.probe.ProbeExperimentConfig` and executed via `jukemir.probe.execute_probe_experiment`. For example, assuming you've followed the previous steps, you can train a linear probe on `gtzan_ff` using features from `jukebox` via the following script:
 
 ```py
-import pathlib
-
-from jukemir import CACHE_DIR
 from jukemir.probe import ProbeExperimentConfig, execute_probe_experiment
 
-DATASET_TAG = "gtzan_ff"
-REPRESENTATION_TAG = "jukebox"
-
-cfg = ProbeExperimentConfig(dataset=DATASET_TAG, representation=REPRESENTATION_TAG)
-output_root_dir = pathlib.Path(CACHE_DIR, "probes", DATASET_TAG, REPRESENTATION_TAG)
-execute_probe_experiment(cfg, output_root_dir=output_root_dir)
+cfg = ProbeExperimentConfig(dataset="gtzan_ff", representation="jukebox")
+execute_probe_experiment(cfg)
 ```
 
 To generate config files for the grid searches described in our paper, **run `4_grid_config.sh`**. The resultant files will be saved to the `probes` subdirectory of your cache directory (`~/.jukemir/cache/probes` by default).
