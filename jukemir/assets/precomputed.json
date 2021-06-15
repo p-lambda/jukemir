@@ -1,0 +1,122 @@
+{
+  "PRECOMPUTED-EMOMUSIC-CHOI": {
+    "path_rel": "representations/emomusic-choi.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/emomusic-choi.tar.gz",
+    "checksum": "17d23d7211bd8513bcc6ed4d62cf819389030a3cc786c39e93c3e37df19fcfdc"
+  },
+  "PRECOMPUTED-EMOMUSIC-CHROMA": {
+    "path_rel": "representations/emomusic-chroma.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/emomusic-chroma.tar.gz",
+    "checksum": "cbe6faaa56309450103888442ab144d0f2fbc43f35fd0a1ed807bf27d6b6df5a"
+  },
+  "PRECOMPUTED-EMOMUSIC-CLMR": {
+    "path_rel": "representations/emomusic-clmr.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/emomusic-clmr.tar.gz",
+    "checksum": "5b4d19dba824b8fe7f44025657cfd441fabd12c091aab0119d2f9b885f7acc2c"
+  },
+  "PRECOMPUTED-EMOMUSIC-JUKEBOX": {
+    "path_rel": "representations/emomusic-jukebox.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/emomusic-jukebox.tar.gz",
+    "checksum": "bff3a148eb15c60308629e3a1e2593b9d34324bb9404a49f98c44854ea3aeb5e"
+  },
+  "PRECOMPUTED-EMOMUSIC-MFCC": {
+    "path_rel": "representations/emomusic-mfcc.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/emomusic-mfcc.tar.gz",
+    "checksum": "c0d6a45f5d0279e4f296921c2fd64425a1b9bfd9baee751c8809a67a484d5589"
+  },
+  "PRECOMPUTED-EMOMUSIC-MUSICNN": {
+    "path_rel": "representations/emomusic-musicnn.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/emomusic-musicnn.tar.gz",
+    "checksum": "80e09ec228b5a032f813937a59b7bc99775b92af225e42af428cd395ac9b57c9"
+  },
+  "PRECOMPUTED-GIANTSTEPS_CLIPS-CHOI": {
+    "path_rel": "representations/giantsteps_clips-choi.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/giantsteps_clips-choi.tar.gz",
+    "checksum": "ad5286f1eedd978720d20ceadff281ec284a030d217a2f5be011ebf7b7265b49"
+  },
+  "PRECOMPUTED-GIANTSTEPS_CLIPS-CHROMA": {
+    "path_rel": "representations/giantsteps_clips-chroma.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/giantsteps_clips-chroma.tar.gz",
+    "checksum": "2928549df97d4c594a7be14b8b40b68c31120b42eb0c208860ca113ab6d2aae1"
+  },
+  "PRECOMPUTED-GIANTSTEPS_CLIPS-CLMR": {
+    "path_rel": "representations/giantsteps_clips-clmr.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/giantsteps_clips-clmr.tar.gz",
+    "checksum": "152e7d33c96a531ee606181690010878c386c079901b6484e1d666813d5ed340"
+  },
+  "PRECOMPUTED-GIANTSTEPS_CLIPS-JUKEBOX": {
+    "path_rel": "representations/giantsteps_clips-jukebox.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/giantsteps_clips-jukebox.tar.gz",
+    "checksum": "ac25a9c900865482ad1cb5b7d8d8208935491c7134690f8bd530dc660898bee2"
+  },
+  "PRECOMPUTED-GIANTSTEPS_CLIPS-MFCC": {
+    "path_rel": "representations/giantsteps_clips-mfcc.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/giantsteps_clips-mfcc.tar.gz",
+    "checksum": "61d6df264266ba03d27517dba0cbae50904a2d093f9b6c7cc675220311734156"
+  },
+  "PRECOMPUTED-GIANTSTEPS_CLIPS-MUSICNN": {
+    "path_rel": "representations/giantsteps_clips-musicnn.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/giantsteps_clips-musicnn.tar.gz",
+    "checksum": "a837b0a4030df83fd46ae5ed9f4871f6c4fe3d3cfbed2b951b3225a893b98fe6"
+  },
+  "PRECOMPUTED-GTZAN_FF-CHOI": {
+    "path_rel": "representations/gtzan_ff-choi.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/gtzan_ff-choi.tar.gz",
+    "checksum": "7b6ee4d2cf368a5d5006a4fd1af3f6176bae5d1cf665fac06c8cd0ffb0529d4e"
+  },
+  "PRECOMPUTED-GTZAN_FF-CHROMA": {
+    "path_rel": "representations/gtzan_ff-chroma.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/gtzan_ff-chroma.tar.gz",
+    "checksum": "2a95d7ba03f8b4a500b1a2e38f9449069b449fc68a2ca13a35a94edf2d5f5e8e"
+  },
+  "PRECOMPUTED-GTZAN_FF-CLMR": {
+    "path_rel": "representations/gtzan_ff-clmr.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/gtzan_ff-clmr.tar.gz",
+    "checksum": "fe4de733f91c94a1fe2900ee989602c0463a29a8ad3276c21b077a1bff32fa81"
+  },
+  "PRECOMPUTED-GTZAN_FF-JUKEBOX": {
+    "path_rel": "representations/gtzan_ff-jukebox.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/gtzan_ff-jukebox.tar.gz",
+    "checksum": "d3d619b907f84069faada1fd81edede6518e11bbb90c3d3f75785b9c48f472c8"
+  },
+  "PRECOMPUTED-GTZAN_FF-MFCC": {
+    "path_rel": "representations/gtzan_ff-mfcc.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/gtzan_ff-mfcc.tar.gz",
+    "checksum": "13d8fe30ae20cec7dc91363a8f2b55a5f6c1b60091d2349eefdf33e217b66169"
+  },
+  "PRECOMPUTED-GTZAN_FF-MUSICNN": {
+    "path_rel": "representations/gtzan_ff-musicnn.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/gtzan_ff-musicnn.tar.gz",
+    "checksum": "3a72e7dfca03ab4aa5eaa6a875d7962225ea1f61f715a1335cf98aee493ce0ff"
+  },
+  "PRECOMPUTED-MAGNATAGATUNE-CHOI": {
+    "path_rel": "representations/magnatagatune-choi.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/magnatagatune-choi.tar.gz",
+    "checksum": "5c7c72f2ec12ad609e6cc31ecf06872e6f6d82d492a40ec578f44fc6c6ddf078"
+  },
+  "PRECOMPUTED-MAGNATAGATUNE-CHROMA": {
+    "path_rel": "representations/magnatagatune-chroma.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/magnatagatune-chroma.tar.gz",
+    "checksum": "4725c13fd25b9b3fdbd59f73c0637b882486a340283a80ab8649a9a64d0a3313"
+  },
+  "PRECOMPUTED-MAGNATAGATUNE-CLMR": {
+    "path_rel": "representations/magnatagatune-clmr.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/magnatagatune-clmr.tar.gz",
+    "checksum": "a69ad2f3f462915f00519cdc160dde94f46b9cc190f0391525957f2547e04e67"
+  },
+  "PRECOMPUTED-MAGNATAGATUNE-JUKEBOX": {
+    "path_rel": "representations/magnatagatune-jukebox.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/magnatagatune-jukebox.tar.gz",
+    "checksum": "2547b4d5c6b85bad1de12c6280c704e1183b6740c07316d0f08325b95f966d40"
+  },
+  "PRECOMPUTED-MAGNATAGATUNE-MFCC": {
+    "path_rel": "representations/magnatagatune-mfcc.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/magnatagatune-mfcc.tar.gz",
+    "checksum": "3d2f95a221478873be34d5f00ede38ce50b1707d322838831aeff8f0c00800d5"
+  },
+  "PRECOMPUTED-MAGNATAGATUNE-MUSICNN": {
+    "path_rel": "representations/magnatagatune-musicnn.tar.gz",
+    "url": "https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/magnatagatune-musicnn.tar.gz",
+    "checksum": "3b87e35f5774e30ff6d8932f9a7e41cfe07b8d7542866fddd70660a8869b8643"
+  }
+}
