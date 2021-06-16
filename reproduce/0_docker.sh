@@ -10,9 +10,8 @@ docker run \
   -d \
   --name jukemir \
   -u $(id -u):$(id -g) \
-  -v $(pwd)/../jukemir:/jukemir/jukemir \
   -v $HOST_CACHE:/jukemir/cache \
+  -v $(pwd)/../jukemir:/jukemir/jukemir \
   -v $(pwd)/../reproduce:/jukemir/reproduce \
-  -p 8888:8888 \
   jukemir/lib \
   bash

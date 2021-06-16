@@ -37,11 +37,22 @@ RUN python -m pip install --no-cache-dir wandb
 # Create workdir and cache
 ARG WORKDIR=/jukemir
 RUN mkdir -p $WORKDIR
-RUN mkdir -p $WORKDIR/cache
 WORKDIR $WORKDIR
+RUN mkdir cache
 ENV JUKEMIR_CACHE_DIR $WORKDIR/cache
 
 # Install library placeholder
 COPY setup.py setup.py
-RUN mkdir -p $WORKDIR/jukemir
+RUN mkdir jukemir
 RUN python -m pip install --no-cache-dir -e .
+
+# Create additional folders
+RUN mkdir notebooks
+RUN mkdir scripts
+RUN mkdir tests
+
+# Create user
+RUN useradd -ms /bin/bash jukemir
+RUN chmod -R ugo+rw $WORKDIR
+RUN chown -R jukemir $WORKDIR
+USER jukemir
