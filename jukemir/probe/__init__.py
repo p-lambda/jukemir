@@ -553,7 +553,10 @@ class ProbeExperiment:
             cfg = json.load(f)
         with open(pathlib.Path(model_dir, f"scaler.pkl"), "rb") as f:
             scaler = pickle.load(f)
-        state_dict = torch.load(pathlib.Path(model_dir, f"probe.pt"))
+        state_dict = torch.load(
+            pathlib.Path(model_dir, f"probe.pt"),
+            map_location=torch.device("cuda" if torch.cuda.is_available() else "cpu"),
+        )
         if len(cfg["hidden_layer_sizes"]) > 0:
             input_layer = "hidden_0.weight"
         else:
