@@ -55,7 +55,7 @@ Because `choi` uses batchnorm during inference, its representations will differ 
 
 A Python script at [`scripts/3_extract.py`](scripts/3_extract.py) will generate all of the Docker commands needed to re-extract all representations for all datasets (see [`scripts/3_extract.sh`](scripts/3_extract.sh) for output). We highly recommend executing these commands in parallel in your own computing environment, as running them one at a time will take a long time.
 
-### (Step 4) Running probing experiments
+### (Steps 4/5) Configuring and running probing experiments
 
 Individual probing experiments are defined using a `jukemir.probe.ProbeExperimentConfig` and executed via `jukemir.probe.execute_probe_experiment`. For example, assuming you've followed the previous steps, you can train a linear probe on `gtzan_ff` using features from `jukebox` via the following script:
 
@@ -68,7 +68,13 @@ execute_probe_experiment(cfg)
 
 To generate config files for the grid searches described in our paper, **run `4_grid_config.sh`**. The resultant files will be saved to the `probes` subdirectory of your cache directory (`~/.jukemir/cache/probes` by default).
 
-### Aggregating grid search results and evaluating test performance
+To run all probing experiments one after another, **run `5_grid_train_serial.sh`**. This will take several days to run to completion. The resultant files will be saved to the `probes` subdirectory of your cache directory (`~/.jukemir/cache/probes` by default).
+
+We highly recommend parallelizing this computation in your own environment. For example, you can run this computation in parallel on the [Codalab platform](https://worksheets.codalab.org/worksheets/0x7c5afa6f88bd4ff29fec75035332a583) by `pip`-installing the [`codalab`](https://pypi.org/project/codalab/) and **running `5_grid_train_codalab.sh`**.
+
+### (Step 6) Evaluating test performance
+
+Once all the probes are done training, **run `6_evaluate.sh`** to find the runs with the best validation scores for each dataset/representation and compute test performance.
 
 ## Citation
 

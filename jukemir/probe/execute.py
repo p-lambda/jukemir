@@ -7,13 +7,16 @@ if __name__ == "__main__":
 
     parser = ArgumentParser()
     parser.add_argument("cfg_json_path", type=str)
-    parser.add_argument("output_root_dir", type=str)
+    parser.add_argument("--output_root_dir", type=str)
     parser.add_argument("--datasets_root_dir", type=str)
     parser.add_argument("--representations_root_dir", type=str)
     parser.add_argument("--wandb", action="store_true")
 
     parser.set_defaults(
-        wandb=False, datasets_root_dir=None, representations_root_dir=None
+        wandb=False,
+        output_root_dir=None,
+        datasets_root_dir=None,
+        representations_root_dir=None,
     )
 
     args = parser.parse_args()
