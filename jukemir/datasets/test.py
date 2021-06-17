@@ -95,25 +95,25 @@ class Test(unittest.TestCase):
     def test_iter_emomusic(self):
         d = {uid: metadata for uid, metadata in iter_emomusic(metadata_only=True)}
         self.assertEqual(len(d), 744)
-        valences = []
         arousals = []
+        valences = []
         split_counts = Counter()
         for uid, attrs in d.items():
             split_counts[attrs["split"]] += 1
-            valence, arousal = attrs["y"]
-            valences.append(valence)
+            arousal, valence = attrs["y"]
             arousals.append(arousal)
+            valences.append(valence)
         self.assertEqual(split_counts["train"], 504)
         self.assertEqual(split_counts["valid"], 115)
         self.assertEqual(split_counts["test"], 125)
-        self.assertAlmostEqual(np.min(valences), -2.689, places=3)
-        self.assertAlmostEqual(np.max(valences), 2.492, places=3)
-        self.assertAlmostEqual(np.mean(valences), 0.026, places=3)
-        self.assertAlmostEqual(np.std(valences), 0.992, places=3)
         self.assertAlmostEqual(np.min(arousals), -2.277, places=3)
         self.assertAlmostEqual(np.max(arousals), 2.629, places=3)
         self.assertAlmostEqual(np.mean(arousals), 0.022, places=3)
         self.assertAlmostEqual(np.std(arousals), 0.992, places=3)
+        self.assertAlmostEqual(np.min(valences), -2.689, places=3)
+        self.assertAlmostEqual(np.max(valences), 2.492, places=3)
+        self.assertAlmostEqual(np.mean(valences), 0.026, places=3)
+        self.assertAlmostEqual(np.std(valences), 0.992, places=3)
         """
         # Before normalization
         self.assertAlmostEqual(np.min(valences), 1.6, places=3)
@@ -160,8 +160,6 @@ class Test(unittest.TestCase):
             uid: metadata for uid, metadata in iter_giantsteps_clips(metadata_only=True)
         }
         self.assertEqual(len(d), 7035)
-        for metadata in d.values():
-            self.assertAlmostEqual(metadata["clip"]["clip_duration"], 30.0, places=3)
 
     def test_cache_dataset(self):
         def iter_fake_dataset(metadata_only):

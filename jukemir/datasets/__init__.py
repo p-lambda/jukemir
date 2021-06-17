@@ -246,8 +246,8 @@ def iter_emomusic(metadata_only=False):
                     uid_to_metadata[uid]["extra"][stem] = row
                     if stem == "static_annotations":
                         uid_to_metadata[uid]["y"] = [
-                            float(row["mean_valence"]),
                             float(row["mean_arousal"]),
+                            float(row["mean_valence"]),
                         ]
 
         # Normalize
