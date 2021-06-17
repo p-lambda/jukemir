@@ -609,7 +609,7 @@ def grid_cfgs(dataset, representation, grid):
 
 _PAPER_GRID = {
     "data_standardization": [False, True],
-    "hidden_layer_sizes": [[], [512], [512, 256]],
+    "hidden_layer_sizes": [[], [512]],
     "batch_size": [64, 256],
     "learning_rate": [1e-5, 1e-4, 1e-3],
     "dropout_p": [0.25, 0.5, 0.75],

@@ -102,4 +102,4 @@ class Test(unittest.TestCase):
         self.assertEqual(cfgs[-1]["batch_size"], 20)
         self.assertEqual(cfgs[-1]["learning_rate"], 2)
         cfgs = paper_grid_cfgs("test", "test")
-        self.assertEqual(len(cfgs), 324)
+        self.assertEqual(len(cfgs), 216)
