@@ -2,22 +2,22 @@
 
 This repository contains code for our paper [_Codified audio language modeling learns useful representations for music information retrieval_]() (Castellon et al. 2021), which demonstrates that [OpenAI's Jukebox](https://openai.com/blog/jukebox/) (Dhariwal et al. 2020) provides rich representations for music transfer learning.
 
-This README is divided into two standalone sections. The [first section](#simple-example) is optimized for simplicity and provides an end-to-end example of genre detection using representations from Jukebox. The [second section](#reproducing-results) is optimized for reproducibility and provides step-by-step instructions for reproducing the results from our paper.
+This README is divided into two standalone sections. The [first section](#simple-example-of-using-jukebox-for-transfer-learning) is optimized for simplicity and provides an end-to-end example of genre detection using representations from Jukebox. The [second section](#reproducing-results-from-our-paper) is optimized for reproducibility and provides step-by-step instructions for reproducing the results from our paper.
 
 ## Simple example of using Jukebox for transfer learning
 
 This section provides a quick demonstration of using Jukebox for transfer learning on the GTZAN genre detection dataset (Tzanetakis and Cook 2002).
 
-Our codebase uses Docker to make it easier for you to extract representations from Jukebox for new audio files. If you do not already have Docker on your machine, please follow [these instructions](https://docs.docker.com/get-docker/) to install it.
+Our codebase uses Docker to simplify the process of extracting representations from Jukebox for new audio files. If you do not already have Docker on your machine, please follow [these instructions](https://docs.docker.com/get-docker/) to install it.
 
-First, create a new directory for the tutorial and navigate into it. Run the following to download the dataset and extract it:
+Once docker is installed, run the following to download and extract the dataset:
 
 ```sh
 wget http://opihi.cs.uvic.ca/sound/genres.tar.gz
 tar xvfz genres.tar.gz
 ```
 
-Next, we need to extract features using Jukebox. This will require a system with at least 30GB of RAM and a GPU with at least 12GB VRAM. Feature extraction will take a few hours (though it can be parallelized). If your system does not meet these requirements, you can also [download the pre-computed features](). If your system does meet the requirements, run:
+Next, we will extract representations from Jukebox. This will require a system with at least 30GB of RAM and a GPU with at least 12GB VRAM. Feature extraction will take a few hours (though it can be parallelized). If your system does not meet these requirements, you can alternatively [download the pre-computed features](https://nlp.stanford.edu/data/cdonahue/jukemir/precomputed/gtzan-jukebox.tar.gz). If your system does meet the requirements, run:
 
 ```sh
 for GENRE in blues classical country disco hiphop jazz metal pop reggae rock
@@ -32,14 +32,17 @@ do
 done
 ```
 
-The results will be a folder called `features` of simple numpy arrays each containing a 4800-dimensional vector, one per WAV file. To evaluate these representations on GTZAN, run the following Python script (requires `sklearn`):
+This pre-built Docker container ([`jukemir/representations_jukebox`](https://hub.docker.com/repository/docker/jukemir/representations_jukebox)) automatically extracts representations for all files in its input folder (`/input`) and saves a standard numpy array for each file in its output folder (`/output`). You can use Docker's `-v` directive to link input and output folders on your host machine to these directories (see above for an example).
+
+Once you've extracted representations from Jukebox, you can train simple classifiers on top of them for different MIR tasks. For example, the following Python script trains and evaluates a simple SVM classifier on GTZAN:
 
 ```py
 import glob
 import os
 import random
 
-from sklearn.linear_model import LogisticRegression
+import numpy as np
+from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
@@ -55,12 +58,12 @@ X = np.array([np.load(p) for p in npy_paths])
 y = np.array([os.path.split(p)[1].split('.')[0] for p in npy_paths])
 
 # Run cross-validation
-clf = make_pipeline(StandardScaler(), LogisticRegression())
+clf = make_pipeline(StandardScaler(), SVC())
 scores = cross_val_score(clf, X, y, cv=10)
-print(np.mean(scores), np.std(scores))
+print('{:.1f} +- {:.1f}'.format(np.mean(scores) * 100, np.std(scores) * 100))
 ```
 
-Note that, for simplicity, the above code performs the _traditional_ evaluation for GTZAN which uses 10-fold cross validation. In our paper, we evaluate on the "fault-filtered" GTZAN split from Kereliuk et al. 2015.
+This should print out `92.5 +- 2.9`, though results may differ slightly due to minor numerical differences. Note that, for simplicity, the above code performs the _traditional_ evaluation for GTZAN which uses 10-fold cross validation. In our paper, we evaluate on the "fault-filtered" GTZAN split from Kereliuk et al. 2015.
 
 ## Reproducing results from our paper
 
@@ -86,7 +89,7 @@ The resultant files will be downloaded to the `datasets` subdirectory of your ca
 
 ### (Step 2) Processing the datasets
 
-Once the raw assets have been downloaded, **run [2_process.sh](reproduce/)** to process them into a standard format (parses all metadata and decodes MP3s to 16-bit PCM WAV files). Note that this script will also take several hours to run and will produce about 50GB of WAV files.
+Once the raw assets have been downloaded, **run [`./2_process.sh`](reproduce/2_process.sh)** to process them into a standard format (parses all metadata and decodes MP3s to 16-bit PCM WAV files). Note that this script will also take several hours to run and will produce about 50GB of WAV files.
 
 The resultant files will be saved to the `processed` subdirectory of your cache directory (`~/.jukemir/cache/processed` by default).
 
@@ -109,7 +112,7 @@ Note that each container also takes two optional arguments as input, `--batch_si
 
 Because `choi` uses batchnorm during inference, its representations will differ if `--batch_size` is changed from its default value of `256` (not recommended). All other representations are invariant to batch size. Note that `musicnn`, `clmr`, and `jukebox` should be run on a machine with a GPU.
 
-A Python script at [`scripts/3_extract.py`](scripts/3_extract.py) will generate all of the Docker commands needed to re-extract all representations for all datasets (see [`scripts/3_extract.sh`](scripts/3_extract.sh) for output). We highly recommend executing these commands in parallel in your own computing environment, as running them one at a time will take a long time.
+A Python script at [`reproduce/3_extract.py`](reproduce/3_extract.py) will generate all of the Docker commands needed to re-extract all representations for all datasets (see [`reproduce/3_extract.sh`](reproduce/3_extract.sh) for output). We highly recommend executing these commands in parallel in your own computing environment, as running them one at a time will take a long time.
 
 ### (Steps 4/5) Configuring and running probing experiments
 
@@ -122,15 +125,15 @@ cfg = ProbeExperimentConfig(dataset="gtzan_ff", representation="jukebox")
 execute_probe_experiment(cfg)
 ```
 
-To generate config files for the grid searches described in our paper, **run `4_grid_config.sh`**. The resultant files will be saved to the `probes` subdirectory of your cache directory (`~/.jukemir/cache/probes` by default).
+To generate config files for the grid searches described in our paper, **run `./4_grid_config.sh`**. The resultant files will be saved to the `probes` subdirectory of your cache directory (`~/.jukemir/cache/probes` by default).
 
-To run all probing experiments one after another, **run `5_grid_train_serial.sh`**. This will take several days to run to completion. The resultant files will be saved to the `probes` subdirectory of your cache directory (`~/.jukemir/cache/probes` by default).
+To run all probing experiments one after another, **run `./5_grid_train_serial.sh`**. This will take several days to run to completion. The resultant files will be saved to the `probes` subdirectory of your cache directory (`~/.jukemir/cache/probes` by default).
 
-We highly recommend parallelizing this computation in your own environment. For example, you can run this computation in parallel on the [Codalab platform](https://worksheets.codalab.org/worksheets/0x7c5afa6f88bd4ff29fec75035332a583) by `pip`-installing the [`codalab`](https://pypi.org/project/codalab/) and **running `5_grid_train_codalab.sh`**.
+We highly recommend parallelizing this computation in your own environment. For example, you can run this computation in parallel on the [Codalab platform](https://worksheets.codalab.org/worksheets/0x7c5afa6f88bd4ff29fec75035332a583) by `pip`-installing the [`codalab`](https://pypi.org/project/codalab/) and **running `./5_grid_train_codalab.sh`**.
 
 ### (Step 6) Evaluating test performance
 
-Once all the probes are done training, **run `6_evaluate.sh`** to find the runs with the best validation scores for each dataset/representation and compute test performance.
+Once all the probes are done training, **run `./6_evaluate.sh`** to find the runs with the best validation scores for each dataset/representation and compute test performance.
 
 ## Citation
 
