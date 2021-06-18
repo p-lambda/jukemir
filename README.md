@@ -1,10 +1,66 @@
 # Jukebox for MIR transfer learning
 
-This repository contains code for our paper [_Codified audio language modeling learns useful representations for music information retrieval_]() (Castellon et al. 2021), which demonstrates that [OpenAI's Jukebox](https://openai.com/blog/jukebox/) provides rich representations for MIR transfer learning.
+This repository contains code for our paper [_Codified audio language modeling learns useful representations for music information retrieval_]() (Castellon et al. 2021), which demonstrates that [OpenAI's Jukebox](https://openai.com/blog/jukebox/) (Dhariwal et al. 2020) provides rich representations for music transfer learning.
 
 This README is divided into two standalone sections. The [first section](#simple-example) is optimized for simplicity and provides an end-to-end example of genre detection using representations from Jukebox. The [second section](#reproducing-results) is optimized for reproducibility and provides step-by-step instructions for reproducing the results from our paper.
 
 ## Simple example of using Jukebox for transfer learning
+
+This section provides a quick demonstration of using Jukebox for transfer learning on the GTZAN genre detection dataset (Tzanetakis and Cook 2002).
+
+Our codebase uses Docker to make it easier for you to extract representations from Jukebox for new audio files. If you do not already have Docker on your machine, please follow [these instructions](https://docs.docker.com/get-docker/) to install it.
+
+First, create a new directory for the tutorial and navigate into it. Run the following to download the dataset and extract it:
+
+```sh
+wget http://opihi.cs.uvic.ca/sound/genres.tar.gz
+tar xvfz genres.tar.gz
+```
+
+Next, we need to extract features using Jukebox. This will require a system with at least 30GB of RAM and a GPU with at least 12GB VRAM. This will take a few hours (though it can be parallelized). The results will be a folder of simple numpy arrays each containing a 4800-dimensional vector, one per WAV file.
+
+```sh
+for GENRE in blues classical country disco hiphop jazz metal pop reggae rock
+do
+	echo $GENRE
+	docker run \
+		-it \
+		--rm \
+		-v $(pwd)/genres/$GENRE:/input \
+		-v $(pwd)/features:/output \
+		jukemir/representations_jukebox
+done
+```
+
+To evaluate these representations on GTZAN, run the following Python script (requires `sklearn`):
+
+```py
+import glob
+import os
+import random
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_score
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+# Find numpy paths (and randomize to remove label ordering)
+npy_paths = sorted(glob.glob('features/*.npy'))
+assert len(npy_paths) == 1000
+random.seed(0)
+random.shuffle(npy_paths)
+
+# Load data
+X = np.array([np.load(p) for p in npy_paths])
+y = np.array([os.path.split(p)[1].split('.')[0] for p in npy_paths])
+
+# Run cross-validation
+clf = make_pipeline(StandardScaler(), LogisticRegression())
+scores = cross_val_score(clf, X, y, cv=10)
+print(np.mean(scores), np.std(scores))
+```
+
+Note that, for simplicity, the above code performs the _traditional_ evaluation for GTZAN which uses 10-fold cross validation. In our paper, we evaluate on the "fault-filtered" GTZAN split from Kereliuk et al. 2015.
 
 ## Reproducing results from our paper
 
