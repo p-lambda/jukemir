@@ -17,7 +17,7 @@ wget http://opihi.cs.uvic.ca/sound/genres.tar.gz
 tar xvfz genres.tar.gz
 ```
 
-Next, we need to extract features using Jukebox. This will require a system with at least 30GB of RAM and a GPU with at least 12GB VRAM. This will take a few hours (though it can be parallelized). The results will be a folder of simple numpy arrays each containing a 4800-dimensional vector, one per WAV file.
+Next, we need to extract features using Jukebox. This will require a system with at least 30GB of RAM and a GPU with at least 12GB VRAM. Feature extraction will take a few hours (though it can be parallelized). If your system does not meet these requirements, you can also [download the pre-computed features](). If your system does meet the requirements, run:
 
 ```sh
 for GENRE in blues classical country disco hiphop jazz metal pop reggae rock
@@ -32,7 +32,7 @@ do
 done
 ```
 
-To evaluate these representations on GTZAN, run the following Python script (requires `sklearn`):
+The results will be a folder called `features` of simple numpy arrays each containing a 4800-dimensional vector, one per WAV file. To evaluate these representations on GTZAN, run the following Python script (requires `sklearn`):
 
 ```py
 import glob
