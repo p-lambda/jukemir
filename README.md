@@ -1,6 +1,6 @@
 # Jukebox for MIR transfer learning
 
-This repository contains code for our paper [_Codified audio language modeling learns useful representations for music information retrieval_]() (Castellon et al. 2021), which demonstrates that [OpenAI's Jukebox](https://openai.com/blog/jukebox/) (Dhariwal et al. 2020) provides rich representations for music transfer learning.
+This repository contains code for our paper [_Codified audio language modeling learns useful representations for music information retrieval_](https://arxiv.org/abs/2107.05677) (Castellon et al. 2021), which demonstrates that [OpenAI's Jukebox](https://openai.com/blog/jukebox/) (Dhariwal et al. 2020) provides rich representations for music transfer learning.
 
 This README is divided into two standalone sections. The [first section](#simple-example-of-using-jukebox-for-transfer-learning) is optimized for simplicity and provides an end-to-end example of genre detection using representations from Jukebox. The [second section](#reproducing-results-from-our-paper) is optimized for reproducibility and provides step-by-step instructions for reproducing the results from our paper.
 
@@ -143,7 +143,7 @@ If you use this codebase in your work, please consider citing our paper:
 @article{castellon2021calm,
   title={Codified audio language modeling learns useful representations for music information retrieval},
   author={Rodrigo Castellon and Chris Donahue and Percy Liang},
-  journal={arXiv:2107.},
+  journal={arXiv:2107.05677},
   year={2021},
 }
 ```
