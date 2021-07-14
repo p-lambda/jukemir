@@ -140,10 +140,10 @@ Once all the probes are done training, **run `./6_evaluate.sh`** to find the run
 If you use this codebase in your work, please consider citing our paper:
 
 ```
-@article{castellon2021calm,
+@inproceedings{castellon2021calm,
   title={Codified audio language modeling learns useful representations for music information retrieval},
-  author={Rodrigo Castellon and Chris Donahue and Percy Liang},
-  journal={arXiv:2107.05677},
-  year={2021},
+  author={Castellon, Rodrigo and Donahue, Chris and Liang, Percy},
+  booktitle={ISMIR},
+  year={2021}
 }
 ```
