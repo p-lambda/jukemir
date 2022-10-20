@@ -26,6 +26,8 @@ Simply pass the audio, layer numbers you're interested in, whether you want to m
 
 ## Simple example of using Jukebox for transfer learning
 
+Disclaimer: the hosting link for GTZAN here appears to be dead, but you can try downloading another dataset (Giantsteps, MTT, EmoMusic) instead.
+
 This section provides a quick demonstration of using Jukebox for transfer learning on the GTZAN genre detection dataset (Tzanetakis and Cook 2002).
 
 Our codebase uses Docker to simplify the process of extracting representations from Jukebox for new audio files. If you do not already have Docker on your machine, please follow [these instructions](https://docs.docker.com/get-docker/) to install it.
