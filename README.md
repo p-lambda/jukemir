@@ -2,9 +2,31 @@
 
 This repository contains code for our paper [_Codified audio language modeling learns useful representations for music information retrieval_](https://arxiv.org/abs/2107.05677) (Castellon et al. 2021), which demonstrates that [OpenAI's Jukebox](https://openai.com/blog/jukebox/) (Dhariwal et al. 2020) provides rich representations for music transfer learning.
 
-This README is divided into two standalone sections. The [first section](#simple-example-of-using-jukebox-for-transfer-learning) is optimized for simplicity and provides an end-to-end example of genre detection using representations from Jukebox. The [second section](#reproducing-results-from-our-paper) is optimized for reproducibility and provides step-by-step instructions for reproducing the results from our paper.
+This README is divided into three standalone sections. The [first section](#simple-example-of-inference-with-jukebox-in-colab), providing a Colab notebook that allows you to perform inference on the full Jukebox model for free, is optimized for simplicity and ease-of-use. The [second section](#simple-example-of-using-jukebox-for-transfer-learning) requires some setting up, but  provides an end-to-end example of genre detection using representations from Jukebox. The [third section](#reproducing-results-from-our-paper) is optimized for reproducibility and provides step-by-step instructions for reproducing the results from our paper.
+
+## Simple example of inference with Jukebox in Colab
+
+Despite Jukebox's large size, it can be made to run on a single Tesla T4 GPU on Colab for free. Check out the [notebook here](https://colab.research.google.com/drive/1x4qt_-SLrSSRzOuz7dkuxTK-o4fSoH9n?usp=sharing). In the notebook, you should be able to use the API to extract representations in a couple lines of code:
+
+```python
+audio = load_audio_from_file(fname, offset=0.0, duration=25)
+
+representations = get_acts_from_audio(audio=audio,
+                                      layers=[36],
+                                      meanpool=True)
+
+print(f"Got representations {representations}")
+print(f"Its shape is {representations[36].shape}")
+```
+
+Simply pass the audio, layer numbers you're interested in, whether you want to mean-pool, and you'll get representations from Jukebox out. We accomplish these memory savings by [initializing the model with the meta device](https://huggingface.co/docs/accelerate/v0.11.0/en/big_modeling), letting you perform end-to-end inference on any commodity GPU. All in all, the notebook provides certain benefits over the `jukemir` codebase, including:
+- a clean API for extracting representations in a customizable manner
+- compute savings when performing inference on short audio clips
+- memory-efficient model initialization, enabling extracting representations from later layers in one step
 
 ## Simple example of using Jukebox for transfer learning
+
+Disclaimer: the hosting link for GTZAN here appears to be dead, but you can try downloading another dataset (Giantsteps, MTT, EmoMusic) instead.
 
 This section provides a quick demonstration of using Jukebox for transfer learning on the GTZAN genre detection dataset (Tzanetakis and Cook 2002).
 
