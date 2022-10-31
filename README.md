@@ -26,7 +26,7 @@ Simply pass the audio, layer numbers you're interested in, whether you want to m
 
 ## Simple example of using Jukebox for transfer learning
 
-NOTE: the original hosting link for GTZAN appears to be dead, but you can try downloading it from [The Internet Archive](https://web.archive.org/web/20220330055949/http://opihi.cs.uvic.ca/sound/genres.tar.gz) instead.
+NOTE: the original hosting link for GTZAN appears to be dead, but you can try downloading it from [The Internet Archive](https://web.archive.org/web/20211207012050/http://opihi.cs.uvic.ca/sound/genres.tar.gz) instead.
 
 This section provides a quick demonstration of using Jukebox for transfer learning on the GTZAN genre detection dataset (Tzanetakis and Cook 2002).
 
