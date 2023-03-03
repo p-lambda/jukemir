@@ -4,6 +4,8 @@ This repository contains code for our paper [_Codified audio language modeling l
 
 This README is divided into three standalone sections. The [first section](#simple-example-of-inference-with-jukebox-in-colab), providing a Colab notebook that allows you to perform inference on the full Jukebox model for free, is optimized for simplicity and ease-of-use. The [second section](#simple-example-of-using-jukebox-for-transfer-learning) requires some setting up, but  provides an end-to-end example of genre detection using representations from Jukebox. The [third section](#reproducing-results-from-our-paper) is optimized for reproducibility and provides step-by-step instructions for reproducing the results from our paper.
 
+In addition, we provide a Python library for extracting representations from Jukebox in just a couple lines of code. Check it out [here](https://github.com/rodrigo-castellon/jukemirlib)!
+
 ## Simple example of inference with Jukebox in Colab
 
 Despite Jukebox's large size, it can be made to run on a single Tesla T4 GPU on Colab for free. Check out the [notebook here](https://colab.research.google.com/drive/1x4qt_-SLrSSRzOuz7dkuxTK-o4fSoH9n?usp=sharing). In the notebook, you should be able to use the API to extract representations in a couple lines of code:
